@@ -1,0 +1,8 @@
+rootProject.name = 'cub'
+
+include(
+        'bukkit',
+        'common',
+        'jda',
+        'jvm'
+)
