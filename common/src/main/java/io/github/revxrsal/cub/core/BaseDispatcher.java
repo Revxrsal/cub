@@ -144,7 +144,7 @@ public abstract class BaseDispatcher {
                 try {
                     ((BaseHandledCommand) command).responseHandler.handleResponse(result, sender, command, context);
                 } catch (Throwable t) {
-                    throw sanitizeStackTrace(new ResponseFailedException(t, result));
+                    throw sanitizeStackTrace(new ResponseFailedException(t, ((BaseHandledCommand) command).responseHandler, result));
                 }
             } catch (Throwable throwable) {
                 if (command.isAsync())
