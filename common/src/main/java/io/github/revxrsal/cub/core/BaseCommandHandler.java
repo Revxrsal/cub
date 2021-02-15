@@ -34,7 +34,7 @@ public class BaseCommandHandler implements CommandHandler {
     final Map<Class<?>, ParameterResolver.ContextResolver<?>> cxtResolvers = new HashMap<>();
     final Map<String, CommandCondition> conditions = new HashMap<>();
     final List<CommandCondition> globalConditions = new ArrayList<>();
-    final Map<Class<?>, Supplier<?>> dependencies = new HashMap<>();
+    protected final Map<Class<?>, Supplier<?>> dependencies = new HashMap<>();
 
     final HashSetMultimap<Class<?>, ParameterValidator<?>> validators = new HashSetMultimap<>();
     final Map<Class<?>, ResponseHandler> responseHandlers = new HashMap<>();
@@ -262,7 +262,7 @@ public class BaseCommandHandler implements CommandHandler {
         for (Field field : getType(instance).getDeclaredFields()) {
             if (field.isAnnotationPresent(Dependency.class)) {
                 ensureAccessible(field);
-                field.set(instance, dependencies.get(field.getType()).get());
+                field.set(instance, c(dependencies.get(field.getType()), "No dependency supplier registered for " + field.getType()).get());
             }
         }
     }

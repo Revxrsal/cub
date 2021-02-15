@@ -12,7 +12,6 @@ import io.github.revxrsal.cub.bukkit.TabSuggestionProvider;
 import io.github.revxrsal.cub.bukkit.annotation.TabResolver;
 import io.github.revxrsal.cub.core.BaseCommandHandler;
 import io.github.revxrsal.cub.exception.InvalidValueException;
-import io.github.revxrsal.cub.exception.MissingPermissionException;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -40,6 +39,7 @@ public final class BukkitHandler extends BaseCommandHandler implements BukkitCom
     public BukkitHandler(@NotNull Plugin plugin) {
         super();
         this.plugin = plugin;
+        super.dependencies.put(plugin.getClass(), () -> plugin);
         registerTypeResolver(Player.class, (a, b, parameter) -> {
             String name = a.pop();
             if (name.equalsIgnoreCase("me")) return ((Player) b);
