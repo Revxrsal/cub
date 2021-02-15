@@ -1,4 +1,6 @@
 # Cub
+[![](https://jitpack.io/v/ReflxctionDev/cub.svg)](https://jitpack.io/#ReflxctionDev/cub)
+
 ![A nice little cub](https://i.imgur.com/qpUWY3A.png)
 
 Cub is an **annotation-based**, **powerful**, **highly customizable** commands framework, made to *greatly* reduce the boilerplate of writing commands, parsing and validating input, creating tab  completions and flags, and many other burdensome things we have to go through all the time when we write a command.
