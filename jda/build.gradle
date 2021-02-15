@@ -3,6 +3,6 @@ repositories {
 }
 
 dependencies {
-    compileOnly project(':common')
+    implementation project(':common')
     compileOnly 'net.dv8tion:JDA:4.2.0_228'
 }
