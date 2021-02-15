@@ -66,8 +66,8 @@ public abstract class BaseDispatcher {
                     command,
                     args.asImmutableList(),
                     context,
-//                    sanitizeStackTrace(t),
-                    t,false);
+                    sanitizeStackTrace(t),
+                    false);
         }
     }
 

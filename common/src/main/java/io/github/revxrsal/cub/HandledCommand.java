@@ -34,12 +34,12 @@ public interface HandledCommand  {
     String getDescription();
 
     /**
-     * Returns the command syntax.
+     * Returns the command usage.
      *
-     * @return The syntax
+     * @return The usage
      */
     @NotNull
-    String getSyntax();
+    String getUsage();
 
     /**
      * Returns the command aliases.

@@ -32,7 +32,7 @@ public class BaseHandledCommand implements HandledCommand {
     private List<String> aliases = new ArrayList<>();
     ResponseHandler responseHandler = ResponseHandler.VOID;
     private String description;
-    private String syntax;
+    private String usage;
     private List<CommandCondition> conditions;
     private boolean async;
     private Executor executor;
@@ -163,7 +163,7 @@ public class BaseHandledCommand implements HandledCommand {
                 });
             }
         }
-        if (syntax == null) syntax = generateSyntax(this);
+        if (usage == null) usage = generateUsage(this);
     }
 
     private void registerSubcommand(@NotNull BaseHandledCommand c) {
@@ -174,7 +174,7 @@ public class BaseHandledCommand implements HandledCommand {
 
     private void setProperties0() {
         description = annReader.get(Description.class, Description::value, null);
-        syntax = annReader.get(Syntax.class, Syntax::value, null);
+        usage = annReader.get(Usage.class, Usage::value, null);
         conditions = Arrays.stream(annReader.get(Conditions.class, Conditions::value, new String[0]))
                 .map(id -> n(handler.conditions.get(id), "Invalid condition: " + id)).collect(Collectors.toList());
         conditions.addAll(handler.globalConditions);
@@ -195,8 +195,8 @@ public class BaseHandledCommand implements HandledCommand {
         return description;
     }
 
-    @Override public @NotNull String getSyntax() {
-        return syntax;
+    @Override public @NotNull String getUsage() {
+        return usage;
     }
 
     @Override public @Nullable HandledCommand getParent() {
@@ -271,7 +271,7 @@ public class BaseHandledCommand implements HandledCommand {
                 ", aliases=" + aliases +
                 ", responseHandler=" + responseHandler +
                 ", description='" + description + '\'' +
-                ", syntax='" + syntax + '\'' +
+                ", usage='" + usage + '\'' +
                 ", async=" + async +
                 ", isPrivate=" + isPrivate +
                 ", method=" + method +
@@ -282,7 +282,7 @@ public class BaseHandledCommand implements HandledCommand {
                 '}';
     }
 
-    private static String generateSyntax(HandledCommand command) {
+    private static String generateUsage(HandledCommand command) {
         if (!command.getParameters().isEmpty()) {
             StringJoiner joiner = new StringJoiner(" ");
             for (CommandParameter parameter : command.getParameters())
@@ -292,7 +292,7 @@ public class BaseHandledCommand implements HandledCommand {
             StringJoiner joiner = new StringJoiner("\n");
             Set<HandledCommand> commands = new LinkedHashSet<>(command.getSubcommands().values());
             for (HandledCommand subcommand : commands) {
-                joiner.add(generateSyntax(subcommand));
+                joiner.add(generateUsage(subcommand));
             }
             return joiner.toString();
         }

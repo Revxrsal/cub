@@ -8,18 +8,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * An annotation to give the {@link HandledCommand} a syntax.
+ * An annotation to give the {@link HandledCommand} a usage.
  * <p>
  * If not present, it will be auto-generated
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Syntax {
+public @interface Usage {
 
     /**
-     * The command syntax
+     * The command usage
      *
-     * @return The syntax
+     * @return The usage
      */
     String value();
 
