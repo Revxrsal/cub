@@ -56,6 +56,10 @@ subprojects {
         options.compilerArgs += ["-parameters"]
     }
 
+    compileTestJava {
+        options.compilerArgs += ["-parameters"]
+    }
+
     jar {
         from '../LICENSE'
     }

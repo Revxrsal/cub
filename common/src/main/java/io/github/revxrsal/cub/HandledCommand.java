@@ -22,7 +22,6 @@ public interface HandledCommand  {
      *
      * @return The command name
      */
-    @NotNull
     String getName();
 
     /**

@@ -100,6 +100,10 @@ public interface CommandParameter {
      */
     @Nullable String getSwitchName();
 
+    boolean isFlag();
+
+    @Nullable String getFlagName();
+
     /**
      * Returns the default {@link Switch#defaultValue()} if the switch was not provided
      * in the command.

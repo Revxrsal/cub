@@ -21,7 +21,7 @@ class BukkitSubject implements BukkitCommandSubject {
         this.sender = sender;
     }
 
-    @Override public String getName() {
+    @Override public @NotNull String getName() {
         return sender.getName();
     }
 
@@ -47,7 +47,7 @@ class BukkitSubject implements BukkitCommandSubject {
         return (Player) sender;
     }
 
-    @Override public UUID getUUID() {
+    @Override public @NotNull UUID getUUID() {
         return sender instanceof ConsoleCommandSender ? CONSOLE_UUID : ((Player) sender).getUniqueId();
     }
 }

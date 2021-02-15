@@ -44,7 +44,7 @@ public final class JDAHandler extends BaseCommandHandler implements JDACommandHa
         registerDependency(JDA.class, jda);
         registerTypeResolver(User.class, (args, csubject, parameter) -> {
             JDACommandSubject subject = (JDACommandSubject) csubject;
-            String supplied = parameter.consumesAllString() ? args.combine(" ") : args.pop();
+            String supplied = args.popForParameter(parameter);
             if (supplied.equalsIgnoreCase("me"))
                 return subject.asUser();
             Matcher matcher = SNOWFLAKE.matcher(supplied); // test for mentions
@@ -83,7 +83,7 @@ public final class JDAHandler extends BaseCommandHandler implements JDACommandHa
         private @Nullable final F<T> byId;
 
         @Override public T resolve(@NotNull ArgumentStack args, @NotNull CommandSubject csubject, @NotNull CommandParameter parameter) throws Throwable {
-            String supplied = parameter.consumesAllString() ? args.combine(" ") : args.pop();
+            String supplied = args.popForParameter(parameter);
             Matcher matcher = SNOWFLAKE.matcher(supplied); // test for mentions
             if (matcher.find()) {
                 return idToChannel.apply(((JDACommandSubject) csubject).getParentEvent().getGuild(), matcher.group(2));
@@ -103,7 +103,7 @@ public final class JDAHandler extends BaseCommandHandler implements JDACommandHa
         private final ValueType type;
 
         @Override public T resolve(@NotNull ArgumentStack args, @NotNull CommandSubject csubject, @NotNull CommandParameter parameter) throws Throwable {
-            String supplied = parameter.consumesAllString() ? args.combine(" ") : args.pop();
+            String supplied = args.popForParameter(parameter);
             Matcher matcher = SNOWFLAKE.matcher(supplied); // test for mentions
             if (matcher.find()) {
                 return idToSnowflake.apply(((JDACommandSubject) csubject).getParentEvent().getGuild(), matcher.group(2));

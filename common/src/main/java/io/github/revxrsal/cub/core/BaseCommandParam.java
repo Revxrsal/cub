@@ -3,6 +3,8 @@ package io.github.revxrsal.cub.core;
 import io.github.revxrsal.cub.CommandHandler;
 import io.github.revxrsal.cub.CommandParameter;
 import io.github.revxrsal.cub.ParameterResolver;
+import io.github.revxrsal.cub.annotation.Flag;
+import io.github.revxrsal.cub.annotation.Switch;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,8 +24,8 @@ final class BaseCommandParam implements CommandParameter {
     private final CommandHandler handler;
     private final ParameterResolver<?, ?> resolver;
     private final boolean optional;
-    private final @Nullable String switchName;
-    private final boolean switchDef;
+    private final @Nullable Switch switchAnn;
+    private final @Nullable Flag flag;
 
     @Override public @NotNull String getName() {
         return name;
@@ -54,7 +56,7 @@ final class BaseCommandParam implements CommandParameter {
     }
 
     @Override public boolean isOptional() {
-        return optional;
+        return optional || getDefaultValue() != null;
     }
 
     @Override public <A extends Annotation> A getAnnotation(@NotNull Class<A> annotation) {
@@ -62,19 +64,27 @@ final class BaseCommandParam implements CommandParameter {
     }
 
     @Override public boolean isSwitch() {
-        return switchName != null;
+        return switchAnn != null;
     }
 
     @Override public @Nullable String getSwitchName() {
-        return switchName;
+        return isSwitch() ? switchAnn.value() : null;
     }
 
     @Override public boolean getDefaultSwitch() {
-        return switchDef;
+        return isSwitch() && switchAnn.defaultValue();
     }
 
     @Override public boolean hasAnnotation(Class<? extends Annotation> annotation) {
         return parameter.isAnnotationPresent(annotation);
+    }
+
+    @Override public boolean isFlag() {
+        return flag != null;
+    }
+
+    @Override public @Nullable String getFlagName() {
+        return isFlag() ? flag.value() : null;
     }
 
     @Override public @NotNull CommandHandler getCommandHandler() {

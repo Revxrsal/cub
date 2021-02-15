@@ -18,7 +18,7 @@ class JDASubject implements JDACommandSubject {
         uuid = new UUID(0, event.getAuthor().getIdLong());
     }
 
-    @Override public String getName() {
+    @Override public @NotNull String getName() {
         return event.getAuthor().getName();
     }
 
@@ -26,7 +26,7 @@ class JDASubject implements JDACommandSubject {
         event.getChannel().sendMessage(message).queue();
     }
 
-    @Override public UUID getUUID() {
+    @Override public @NotNull UUID getUUID() {
         return uuid;
     }
 

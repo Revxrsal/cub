@@ -12,6 +12,7 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.StringJoiner;
 
 import static io.github.revxrsal.cub.core.Utils.n;
 
@@ -24,7 +25,7 @@ public abstract class BaseDispatcher {
     }
 
     public void execute(@NotNull CommandSubject subject, @NotNull CommandContext context, @NotNull String[] argsArray) {
-        ArgumentStack args = new LinkedArgumentStack(handler, argsArray);
+        ArgumentStack args = new LinkedArgumentStack(handler, splitWithoutQuotes(argsArray));
         BaseHandledCommand command = null;
         try {
             String commandName = args.pop();
@@ -52,13 +53,11 @@ public abstract class BaseDispatcher {
                         fallbackArgs.add(handler);
                     else if (parameter.getType() == List.class)
                         fallbackArgs.add(args.asImmutableList());
-                    else
-                        injectFallback(type, args, subject, command, handler);
                 }
                 try {
                     command.fallback.invokeWithArguments(fallbackArgs);
                 } catch (Throwable throwable) {
-                    throw new IllegalStateException("Cannot invoke @Default method", throwable);
+                    throw new IllegalStateException("Cannot invoke @CatchInvalid method", throwable);
                 }
             }
             handler.getExceptionHandler().handleException(
@@ -67,13 +66,9 @@ public abstract class BaseDispatcher {
                     command,
                     args.asImmutableList(),
                     context,
-                    sanitizeStackTrace(t),
-                    false);
+//                    sanitizeStackTrace(t),
+                    t,false);
         }
-    }
-
-    protected void injectFallback(Class<?> type, ArgumentStack args, CommandSubject subject, BaseHandledCommand command, BaseCommandHandler handler) {
-
     }
 
     @SneakyThrows
@@ -82,15 +77,40 @@ public abstract class BaseDispatcher {
             condition.test(sender, args.asImmutableList(), command, context);
         }
         List<Object> invokedArgs = new ArrayList<>();
-        int remainingArgs = args.size();
         for (CommandParameter parameter : command.getParameters()) {
             if (parameter.isSwitch()) {
                 boolean provided = args.remove(handler.switchPrefix + parameter.getSwitchName());
                 if (!provided) invokedArgs.add(parameter.getDefaultSwitch());
                 else {
                     invokedArgs.add(true);
-                    remainingArgs--;
                 }
+                continue;
+            }
+            if (parameter.isFlag()) {
+                String look = handler.flagPrefix + parameter.getFlagName();
+                int index = args.indexOf(look);
+                boolean provided = args.remove(look);
+                if (index == -1) {
+                    if (parameter.isOptional()) {
+                        if (parameter.getDefaultValue() != null) {
+//                            args.add(look);
+                            args.add(parameter.getDefaultValue());
+                            index = args.size() - 2;
+                        } else {
+                            invokedArgs.add(null);
+                            continue;
+                        }
+                    } else {
+                        throw new MissingParameterException(parameter, parameter.getResolver());
+                    }
+                }
+                ValueResolver<?> resolver = (ValueResolver<?>) parameter.getResolver();
+                if (args.size() <= 0) {
+                    throw new MissingParameterException(parameter, resolver);
+                }
+                ArgumentStack newStack = args.subList(index, index + 1);
+                args.removeAll(newStack);
+                invokedArgs.add(parameter.getMethodIndex(), resolver.resolve(newStack, sender, parameter));
                 continue;
             }
             Object result = null;
@@ -107,27 +127,23 @@ public abstract class BaseDispatcher {
                 }
                 if (parameterResolver instanceof ParameterResolver.ValueResolver) {
                     ValueResolver<?> resolver = (ValueResolver<?>) parameterResolver;
-                    if (remainingArgs <= 0) {
+                    if (args.size() <= 0) {
                         if (parameter.getDefaultValue() == null && parameter.isOptional()) {
                             invokedArgs.add(parameter.getMethodIndex(), null);
-                            remainingArgs--;
                             continue;
                         } else {
-                            if (parameter.getDefaultValue() != null)
+                            if (parameter.getDefaultValue() != null) {
                                 args.add(parameter.getDefaultValue());
-                            else
+                            } else
                                 throw new MissingParameterException(parameter, parameterResolver);
                         }
                     }
                     result = resolver.resolve(args, sender, parameter);
-                    invokedArgs.add(parameter.getMethodIndex(), result);
-                    remainingArgs--;
                 } else {
-                    remainingArgs--;
                     ContextResolver<?> resolver = (ContextResolver<?>) parameterResolver;
                     result = resolver.resolve(args.asImmutableList(), sender, parameter);
-                    invokedArgs.add(parameter.getMethodIndex(), result);
                 }
+                invokedArgs.add(parameter.getMethodIndex(), result);
             } catch (Throwable throwable) {
                 if (throwable instanceof CommandException) throw sanitizeStackTrace(throwable);
                 throw sanitizeStackTrace(new ResolverFailedException(
@@ -138,23 +154,27 @@ public abstract class BaseDispatcher {
                 ));
             }
         }
-        command.getExecutor().execute(() -> {
-            try {
-                Object result = n(((BaseHandledCommand) command).getMethodHandle()).invokeWithArguments(invokedArgs);
-                try {
-                    ((BaseHandledCommand) command).responseHandler.handleResponse(result, sender, command, context);
-                } catch (Throwable t) {
-                    throw sanitizeStackTrace(new ResponseFailedException(t, ((BaseHandledCommand) command).responseHandler, result));
-                }
-            } catch (Throwable throwable) {
-                if (command.isAsync())
-                    handler.getExceptionHandler().handleException(
-                            sender, handler, command, args.asImmutableList(), context, sanitizeStackTrace(throwable),
-                            true);
-                else
-                    throw sneakyThrow(sanitizeStackTrace(throwable)); // delegate to the synchronous handler
-            }
-        });
+        command.getExecutor().
+
+                execute(() ->
+
+                {
+                    try {
+                        Object result = n(((BaseHandledCommand) command).getMethodHandle()).invokeWithArguments(invokedArgs);
+                        try {
+                            ((BaseHandledCommand) command).responseHandler.handleResponse(result, sender, command, context);
+                        } catch (Throwable t) {
+                            throw sanitizeStackTrace(new ResponseFailedException(t, ((BaseHandledCommand) command).responseHandler, result));
+                        }
+                    } catch (Throwable throwable) {
+                        if (command.isAsync())
+                            handler.getExceptionHandler().handleException(
+                                    sender, handler, command, args.asImmutableList(), context, sanitizeStackTrace(throwable),
+                                    true);
+                        else
+                            throw sneakyThrow(sanitizeStackTrace(throwable)); // delegate to the synchronous handler
+                    }
+                });
     }
 
     private HandledCommand getCommand(HandledCommand parent, ArgumentStack stack) {
@@ -196,4 +216,37 @@ public abstract class BaseDispatcher {
         throw (T) t;
     }
 
+    public static String[] splitWithoutQuotes(String[] split) {
+        List<String> result = new ArrayList<>();
+        boolean close = false;
+        int index = -1;
+        for (int i = 0; i < split.length; i++) {
+            String t = split[i];
+            if (t.equals("\"\"")) {
+                result.add("");
+                continue;
+            }
+            if (t.length() >= 2 && t.indexOf('"') == 0) {
+                close = true;
+                index = i;
+//                continue;
+            }
+            if (t.lastIndexOf('"') == t.length() - 1 && close && !t.endsWith("\\\"")) {
+                StringJoiner joiner = new StringJoiner(" ");
+                for (int j = 0; j < split.length; j++) {
+                    if (j >= index && j <= i)
+                        joiner.add(split[j]);
+                }
+                result.add((String) joiner.toString().subSequence(1, joiner.length() - 1));
+                close = false;
+                continue;
+            }
+            if (!close) {
+                result.add(t);
+                close = false;
+            }
+        }
+        result.replaceAll(t -> t.replace("\\\"", "\""));
+        return result.toArray(new String[0]);
+    }
 }

@@ -137,8 +137,8 @@ public class BaseHandledCommand implements HandledCommand {
                                 } : null),
                                 "Don't know how to resolve parameter type " + parameter.getType()),
                         pr.has(Optional.class),
-                        pr.get(Switch.class, Switch::value, null),
-                        pr.get(Switch.class, Switch::defaultValue, false)
+                        pr.get(Switch.class),
+                        pr.get(Flag.class)
                 );
                 if (param.isSwitch() && Primitives.unwrap(param.getType()) != Boolean.TYPE)
                     throw new IllegalArgumentException("Cannot use @Switch on non-boolean parameters (" + param.getType().getSimpleName() + " " + param.getName() + ")");
@@ -187,7 +187,7 @@ public class BaseHandledCommand implements HandledCommand {
     protected void setProperties() {
     }
 
-    @Override public @NotNull String getName() {
+    @Override public String getName() {
         return name;
     }
 

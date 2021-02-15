@@ -49,11 +49,31 @@ public interface ArgumentStack extends Deque<String>, List<String> {
     @NotNull CommandHandler getCommandHandler();
 
     /**
+     * Returns (and removes) the string in which might get concatenated with the rest
+     * of the arguments if the parameter {@link CommandParameter#consumesAllString() consumes all strings}
+     * that follow it.
+     *
+     * @param parameter The parameter to get for
+     * @return The string for this parameter. Will return the first argument if the parameter cannot
+     * consume all strings.
+     */
+    String popForParameter(@NotNull CommandParameter parameter);
+
+    /**
      * Creates an identical copy of this argument stack. This copy will behave
      * independently of this agrument stack.
      *
      * @return The copy
      */
     @NotNull ArgumentStack copy();
+
+    /**
+     * Creates a sub-list of this argument stack
+     *
+     * @param startIndex The index to start copying from, inclusive
+     * @param endIndex   The index to stop, exclusive.
+     * @return The newly created sub-argument stack
+     */
+    @NotNull ArgumentStack subList(int startIndex, int endIndex);
 
 }

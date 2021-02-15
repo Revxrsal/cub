@@ -59,7 +59,7 @@ public final class Utils {
         return handle;
     }
 
-    public static <T> List<T> immutable(@NotNull T... values) {
+    @SafeVarargs public static <T> List<T> immutable(@NotNull T... values) {
         return Collections.unmodifiableList(Arrays.asList(values));
     }
 

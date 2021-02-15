@@ -195,4 +195,23 @@ public interface CommandHandler {
      */
     CommandHandler setSwitchPrefix(@NotNull String prefix);
 
+    /**
+     * Returns the prefix that comes before all {@link Flag} parameters
+     * when they are fetched from the command.
+     *
+     * @return The switch prefix
+     */
+    @NotNull String getFlagPrefix();
+
+    /**
+     * Sets the prefix that all parameters annotated with {@link Flag} will
+     * be checked against. If not set, <blockquote>-</blockquote> will be used
+     *
+     * @param prefix New prefix to set
+     * @return This command handler
+     * @throws NullPointerException     if the prefix is null
+     * @throws IllegalArgumentException if the prefix is empty
+     */
+    CommandHandler setFlagPrefix(@NotNull String prefix);
+
 }

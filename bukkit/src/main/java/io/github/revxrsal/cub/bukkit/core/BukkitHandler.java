@@ -56,7 +56,7 @@ public final class BukkitHandler extends BaseCommandHandler implements BukkitCom
             return player;
         });
         registerTypeResolver(World.class, (a, b, parameter) -> {
-            String name = a.pop();
+            String name = a.popForParameter(parameter);
             if (name.equalsIgnoreCase("me")) {
                 if (b instanceof Player) return ((Player) b).getWorld();
                 throw new ServerNotActiveException();

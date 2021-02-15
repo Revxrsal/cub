@@ -6,6 +6,23 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A validator for a specific parameter type. These validators can do extra checks on parameters
  * after they are resolved from {@link ParameterResolver}s.
+ * <p>
+ * Validators work on subclasses as well. For example, we can write a validator to validate
+ * a custom <code>@Range(min, max)</code> annotation for numbers:
+ *
+ * <pre>{@code
+ * public class RangeValidator implements ParameterValidator<Number> {
+ *
+ *     public void validate(Number value, @NotNull CommandParameter parameter, @NotNull CommandSubject sender) {
+ *         Range range = parameter.getAnnotation(Range.class);
+ *         if (range == null) return;
+ *         if (value.doubleValue() < range.min())
+ *             throw new SimpleCommandException(parameter.getName() + " must be more than " + range.min());
+ *         if (value.doubleValue() > range.max())
+ *             throw new SimpleCommandException(parameter.getName() + " must be less than " + range.max());
+ *     }
+ * }
+ * }</pre>
  *
  * @param <T> The parameter handler
  */

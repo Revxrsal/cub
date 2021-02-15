@@ -2,13 +2,12 @@ package io.github.revxrsal.cub.core;
 
 import io.github.revxrsal.cub.ArgumentStack;
 import io.github.revxrsal.cub.CommandHandler;
+import io.github.revxrsal.cub.CommandParameter;
+import io.github.revxrsal.cub.exception.MissingParameterException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
 
 public final class LinkedArgumentStack extends LinkedList<String> implements ArgumentStack {
 
@@ -45,9 +44,29 @@ public final class LinkedArgumentStack extends LinkedList<String> implements Arg
         return commandHandler;
     }
 
+    @Override public String popForParameter(@NotNull CommandParameter parameter) {
+        try {
+            if (!parameter.consumesAllString()) return pop();
+            String value = combine(" ");
+            clear();
+            return value;
+        } catch (NoSuchElementException e) {
+            throw new MissingParameterException(parameter, parameter.getResolver());
+        }
+    }
+
     @Override public @NotNull ArgumentStack copy() {
         LinkedArgumentStack stack = new LinkedArgumentStack(immutableArgsList, commandHandler);
         stack.addAll(this);
+        return stack;
+    }
+
+    @Override public @NotNull ArgumentStack subList(int a, int b) {
+        LinkedArgumentStack stack = new LinkedArgumentStack(immutableArgsList, commandHandler);
+        stack.clear();
+        for (int i = a; i < Math.min(size(), b); i++) {
+            stack.add(get(i));
+        }
         return stack;
     }
 }

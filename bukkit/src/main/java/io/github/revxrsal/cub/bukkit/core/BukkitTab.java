@@ -17,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.github.revxrsal.cub.core.BaseDispatcher.splitWithoutQuotes;
+
 final class BukkitTab implements TabCompleter {
 
     private final BukkitHandler handler;
@@ -26,7 +28,7 @@ final class BukkitTab implements TabCompleter {
     }
 
     @Override public @NotNull List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command bukkitCommand, @NotNull String alias, String[] args) {
-        ArgumentStack stack = new LinkedArgumentStack(handler, args);
+        ArgumentStack stack = new LinkedArgumentStack(handler, splitWithoutQuotes(args));
         if (stack.isEmpty()) return ImmutableList.of();
         Set<String> completions = new HashSet<>();
         HandledCommand parent = handler.getCommands().get(bukkitCommand.getName());

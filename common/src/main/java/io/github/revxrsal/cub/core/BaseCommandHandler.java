@@ -39,15 +39,13 @@ public class BaseCommandHandler implements CommandHandler {
     final HashSetMultimap<Class<?>, ParameterValidator<?>> validators = new HashSetMultimap<>();
     final Map<Class<?>, ResponseHandler> responseHandlers = new HashMap<>();
     String switchPrefix = "-";
+    String flagPrefix = "-";
 
     private CommandExceptionHandler exceptionHandler = null/*DefaultExceptionHandler.INSTANCE*/;
 
     public BaseCommandHandler() {
         registerParameterValidator(Number.class, NumberRangeValidator.INSTANCE);
-        registerTypeResolver(String.class, (a, b, parameter) -> {
-            if (parameter.consumesAllString()) return a.combine(" ");
-            return a.pop();
-        });
+        registerTypeResolver(String.class, (a, b, parameter) -> a.popForParameter(parameter));
         registerTypeResolver(int.class, (a, b, parameter) -> num(a, Integer::parseInt));
         registerTypeResolver(Integer.class, (a, b, parameter) -> num(a, Integer::parseInt));
         registerTypeResolver(double.class, (a, b, parameter) -> num(a, Double::parseDouble));
@@ -84,6 +82,18 @@ public class BaseCommandHandler implements CommandHandler {
         if (prefix.isEmpty())
             throw new IllegalArgumentException("Switch prefix cannot be an empty string!");
         switchPrefix = prefix;
+        return this;
+    }
+
+    @Override public @NotNull String getFlagPrefix() {
+        return flagPrefix;
+    }
+
+    @Override public CommandHandler setFlagPrefix(@NotNull String prefix) {
+        n(prefix, "Switch prefix cannot be null!");
+        if (prefix.isEmpty())
+            throw new IllegalArgumentException("Switch prefix cannot be an empty string!");
+        flagPrefix = prefix;
         return this;
     }
 
@@ -252,7 +262,7 @@ public class BaseCommandHandler implements CommandHandler {
         for (Field field : getType(instance).getDeclaredFields()) {
             if (field.isAnnotationPresent(Dependency.class)) {
                 ensureAccessible(field);
-                field.set(instance, dependencies.get(field.getType()));
+                field.set(instance, dependencies.get(field.getType()).get());
             }
         }
     }
