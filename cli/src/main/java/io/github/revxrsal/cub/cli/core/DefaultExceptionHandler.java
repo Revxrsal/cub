@@ -34,6 +34,8 @@ final class DefaultExceptionHandler implements CommandExceptionHandler {
         } else if (e instanceof ResolverFailedException) {
             ResolverFailedException rfe = (ResolverFailedException) e;
             sender.reply("Cannot resolve " + rfe.getParameter().getName() + " from value " + rfe.getInput());
+        } else if (e instanceof CooldownException) {
+            sender.reply("You must wait " + ((CooldownException) e).getTimeFancy() + " before using this command again.");
         } else if (e instanceof SimpleCommandException) {
             sender.reply(e.getMessage());
         } else {

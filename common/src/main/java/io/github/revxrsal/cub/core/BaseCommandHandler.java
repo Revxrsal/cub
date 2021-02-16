@@ -66,6 +66,7 @@ public class BaseCommandHandler implements CommandHandler {
             if (!command.getPermission().canExecute(subject))
                 throw new MissingPermissionException(command.getPermission());
         });
+        registerGlobalCondition(new CooldownCondition());
     }
 
     @Override public CommandHandler setExceptionHandler(@NotNull CommandExceptionHandler exceptionHandler) {
@@ -126,6 +127,8 @@ public class BaseCommandHandler implements CommandHandler {
                                 ia.add(b);
                             else if (CommandParameter.class.isAssignableFrom(ptype))
                                 ia.add(parameter);
+                            else if (String.class.isAssignableFrom(ptype))
+                                ia.add(a.popForParameter(parameter));
                         }
                         Object value = handle.invokeWithArguments(ia);
                         for (ParameterValidator validator : validators) {

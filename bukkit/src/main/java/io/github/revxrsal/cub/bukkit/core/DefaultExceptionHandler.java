@@ -4,6 +4,7 @@ import io.github.revxrsal.cub.CommandContext;
 import io.github.revxrsal.cub.CommandHandler;
 import io.github.revxrsal.cub.CommandSubject;
 import io.github.revxrsal.cub.HandledCommand;
+import io.github.revxrsal.cub.annotation.Cooldown;
 import io.github.revxrsal.cub.bukkit.SenderNotPlayerException;
 import io.github.revxrsal.cub.exception.*;
 import org.jetbrains.annotations.NotNull;
@@ -42,6 +43,8 @@ final class DefaultExceptionHandler implements CommandExceptionHandler {
             sender.reply("&cCannot resolve " + rfe.getParameter().getName() + " from value &e" + rfe.getInput());
         } else if (e instanceof SimpleCommandException) {
             sender.reply(e.getMessage());
+        } else if (e instanceof CooldownException) {
+            sender.reply("&cYou must wait &e" + ((CooldownException) e).getTimeFancy() + " &cbefore using this command again.");
         } else {
             sender.reply("&cAn error occured while executing this command. Check console for details.");
             e.printStackTrace();
