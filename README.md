@@ -43,3 +43,40 @@ Glad you asked!
 The wiki is an exhaustive source of information for using Cub.
 
 Take a look [here](https://github.com/ReflxctionDev/cub/wiki).
+
+# Example
+```java
+@Command("ticket")
+@Description("Handle tickets")
+public class TicketCommands {
+
+    @Dependency
+    private TicketFactory ticketFactory;
+
+    @Subcommand("new")
+    @Cooldown(value = 10, unit = TimeUnit.MINUTES)
+    @Description("Open a new ticket")
+    public String openTicket(Player sender, String content) {
+        Ticket ticket = ticketFactory.createTicket(sender.getUniqueId(), content);
+        return "&aSuccessfully created ticket with ID &e" + ticket.getId() + "&a.";
+    }
+
+    @Subcommand("close")
+    @TabCompletion("@tickets")
+    @Description("Close the ticket")
+    @TicketModeratorOnly
+    public String closeTicket(@OpenedTicket Ticket ticket) {
+        ticketFactory.closeTicket(ticket);
+        return "&aSuccessfully closed ticket &e" + ticket.getId() + "&a.";
+    }
+
+    @Subcommand("assign")
+    @Description("Assign the ticket to another moderator")
+    @TabCompletion("@tickets @ticketAdmins")
+    @TicketModeratorOnly
+    public String setAssignee(@OpenedTicket Ticket ticket, @TicketModerator Player delegateTo) {
+        ticketFactory.setAssignee(delegateTo);
+        return "&aSuccessfully delegated ticket &e" + ticket.getId() + "&a to &e" + delegateTo.getName() + "&a.";
+    }
+}
+```
