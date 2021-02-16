@@ -75,7 +75,7 @@ public class TicketCommands {
     @TabCompletion("@tickets @ticketAdmins")
     @TicketModeratorOnly
     public String setAssignee(@OpenedTicket Ticket ticket, @TicketModerator Player delegateTo) {
-        ticketFactory.setAssignee(delegateTo);
+        ticket.setAssignee(delegateTo);
         return "&aSuccessfully delegated ticket &e" + ticket.getId() + "&a to &e" + delegateTo.getName() + "&a.";
     }
 }
