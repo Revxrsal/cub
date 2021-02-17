@@ -100,8 +100,18 @@ public interface CommandParameter {
      */
     @Nullable String getSwitchName();
 
+    /**
+     * Returns whether is this parameter a {@link Flag} parameter or not
+     *
+     * @return Whether is this parameter a flag or not
+     */
     boolean isFlag();
 
+    /**
+     * Returns the name of the flag. Returns null if {@link #isFlag()} is false.
+     *
+     * @return The flag name, or null if this parameter is not a flag.
+     */
     @Nullable String getFlagName();
 
     /**

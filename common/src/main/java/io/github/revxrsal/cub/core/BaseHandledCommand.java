@@ -161,7 +161,7 @@ public class BaseHandledCommand implements HandledCommand {
                         });
                     }
                 });
-            }
+            } else responseHandler = handler.responseHandlers.getOrDefault(crt, ResponseHandler.VOID);
         }
         if (usage == null) usage = generateUsage(this);
     }
