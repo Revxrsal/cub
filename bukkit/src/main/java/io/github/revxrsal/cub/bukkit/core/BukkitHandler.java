@@ -5,6 +5,7 @@ import io.github.revxrsal.cub.CommandContext;
 import io.github.revxrsal.cub.CommandHandler;
 import io.github.revxrsal.cub.CommandSubject;
 import io.github.revxrsal.cub.HandledCommand;
+import io.github.revxrsal.cub.ParameterResolver.ContextResolver;
 import io.github.revxrsal.cub.bukkit.BukkitCommandHandler;
 import io.github.revxrsal.cub.bukkit.BukkitCommandSubject;
 import io.github.revxrsal.cub.bukkit.PlayerSelector;
@@ -18,6 +19,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -84,6 +86,7 @@ public final class BukkitHandler extends BaseCommandHandler implements BukkitCom
             return suggestions;
         });
         registerContextResolver(CommandSender.class, (args, subject, parameter) -> ((BukkitSubject) subject).getSender());
+        registerContextResolver(ConsoleCommandSender.class, ContextResolver.of(Bukkit.getConsoleSender()));
         registerContextResolver(BukkitCommandSubject.class, (args, sender, parameter) -> (BukkitCommandSubject) sender);
         setExceptionHandler(DefaultExceptionHandler.INSTANCE);
     }
