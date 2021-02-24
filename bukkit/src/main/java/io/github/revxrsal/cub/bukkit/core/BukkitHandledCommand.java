@@ -107,6 +107,7 @@ class BukkitHandledCommand extends BaseHandledCommand implements io.github.revxr
     }
 
     @NotNull Collection<String> resolveTab(ArgumentStack args, BukkitCommandSubject sender, org.bukkit.command.Command bukkitCommand) {
+        if (isPrivate() || !permission.canExecute(sender)) return Collections.emptyList();
         if (tabCompletions.isEmpty() || args.size() == 0) return Collections.emptyList();
         int index = args.size() - 1;
         try {
