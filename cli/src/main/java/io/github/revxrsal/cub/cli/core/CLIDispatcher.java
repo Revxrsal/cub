@@ -26,10 +26,10 @@ class CLIDispatcher extends BaseDispatcher {
         return null;
     }
 
-     void begin(Scanner scanner) {
+    void begin(Scanner scanner) {
         while (scanner.hasNext()) {
             String input = scanner.nextLine();
-            execute(((CLIHandler) handler).console, () -> ((CLIHandler) handler).console, input.split(" "));
+            execute(((CLIHandler) handler).console, () -> ((CLIHandler) handler).console, SPLIT.split(input));
         }
     }
 
