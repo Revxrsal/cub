@@ -28,7 +28,7 @@ class JDADispatcher extends BaseDispatcher implements EventListener {
         if (!content.startsWith(settings.getPrefix())) return;
         JDASubject subject = new JDASubject(event);
         JDAContext context = new JDAContext(subject);
-        execute(subject, context, content.substring(settings.getPrefix().length()).split(" "));
+        execute(subject, context, SPLIT.split(content.substring(settings.getPrefix().length())));
     }
 
     private String getContent(Message message) {

@@ -13,15 +13,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.regex.Pattern;
 
 import static io.github.revxrsal.cub.core.Utils.n;
 
 public abstract class BaseDispatcher {
 
+    public static final Pattern SPLIT = Pattern.compile(" ");
     protected final BaseCommandHandler handler;
+    private final List<String> sanitizedPaths = new ArrayList<>();
 
     public BaseDispatcher(BaseCommandHandler handler) {
         this.handler = handler;
+        sanitizePath(getClass());
+        sanitizePath(handler.getClass());
     }
 
     public void execute(@NotNull CommandSubject subject, @NotNull CommandContext context, @NotNull String[] argsArray) {
@@ -154,27 +159,23 @@ public abstract class BaseDispatcher {
                 ));
             }
         }
-        command.getExecutor().
-
-                execute(() ->
-
-                {
-                    try {
-                        Object result = n(((BaseHandledCommand) command).getMethodHandle()).invokeWithArguments(invokedArgs);
-                        try {
-                            ((BaseHandledCommand) command).responseHandler.handleResponse(result, sender, command, context);
-                        } catch (Throwable t) {
-                            throw sanitizeStackTrace(new ResponseFailedException(t, ((BaseHandledCommand) command).responseHandler, result));
-                        }
-                    } catch (Throwable throwable) {
-                        if (command.isAsync())
-                            handler.getExceptionHandler().handleException(
-                                    sender, handler, command, args.asImmutableList(), context, sanitizeStackTrace(throwable),
-                                    true);
-                        else
-                            throw sneakyThrow(sanitizeStackTrace(throwable)); // delegate to the synchronous handler
-                    }
-                });
+        command.getExecutor().execute(() -> {
+            try {
+                Object result = n(((BaseHandledCommand) command).getMethodHandle()).invokeWithArguments(invokedArgs);
+                try {
+                    ((BaseHandledCommand) command).responseHandler.handleResponse(result, sender, command, context);
+                } catch (Throwable t) {
+                    throw sanitizeStackTrace(new ResponseFailedException(t, ((BaseHandledCommand) command).responseHandler, result));
+                }
+            } catch (Throwable throwable) {
+                if (command.isAsync())
+                    handler.getExceptionHandler().handleException(
+                            sender, handler, command, args.asImmutableList(), context, sanitizeStackTrace(throwable),
+                            true);
+                else
+                    throw sneakyThrow(sanitizeStackTrace(throwable)); // delegate to the synchronous handler
+            }
+        });
     }
 
     private HandledCommand getCommand(HandledCommand parent, ArgumentStack stack) {
@@ -199,8 +200,13 @@ public abstract class BaseDispatcher {
         elements.removeIf(t -> t.getClassName().equals(BaseDispatcher.class.getName()));
         elements.removeIf(t -> t.getClassName().equals(MethodHandle.class.getName()));
         elements.removeIf(t -> t.getClassName().equals(BaseCommandHandler.class.getName()));
+        elements.removeIf(t -> sanitizedPaths.contains(t.getClassName()));
         throwable.setStackTrace(elements.toArray(new StackTraceElement[0]));
         return throwable;
+    }
+
+    protected void sanitizePath(@NotNull Class<?> type) {
+        sanitizedPaths.add(type.getName());
     }
 
     protected abstract boolean isPossibleSender(@NotNull Class<?> v);

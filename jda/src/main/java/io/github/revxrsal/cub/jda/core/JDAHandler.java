@@ -13,6 +13,7 @@ import io.github.revxrsal.cub.jda.JDACommandSubject;
 import lombok.AllArgsConstructor;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
+import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +22,7 @@ import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Internal
 public final class JDAHandler extends BaseCommandHandler implements JDACommandHandler {
 
     private static final ValueType USER = new ValueType("user");

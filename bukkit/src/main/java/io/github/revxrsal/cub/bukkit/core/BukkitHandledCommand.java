@@ -27,6 +27,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import static io.github.revxrsal.cub.core.BaseDispatcher.SPLIT;
+
 @Getter
 class BukkitHandledCommand extends BaseHandledCommand implements io.github.revxrsal.cub.bukkit.BukkitHandledCommand {
 
@@ -39,7 +41,7 @@ class BukkitHandledCommand extends BaseHandledCommand implements io.github.revxr
     }
 
     @Override protected void setProperties() {
-        tabCompletions = Arrays.asList(annReader.get(TabCompletion.class, TabCompletion::value, "").split(" "));
+        tabCompletions = Arrays.asList(SPLIT.split(annReader.get(TabCompletion.class, TabCompletion::value, "")));
         CommandPermission permission = annReader.get(CommandPermission.class);
         if (permission != null) {
             Permission p = new Permission(permission.value(), permission.access());

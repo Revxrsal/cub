@@ -18,6 +18,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static io.github.revxrsal.cub.core.BaseDispatcher.sneakyThrow;
@@ -122,6 +123,7 @@ public class BaseHandledCommand implements HandledCommand {
                         pr.get(Default.class, Default::value, null),
                         index == ((Method) ae).getParameterCount() - 1 && !pr.has(Single.class),
                         handler,
+                        this,
                         c(firstNotNull(
                                 handler.typeResolvers.get(parameter.getType()),
                                 handler.cxtResolvers.get(parameter.getType()),
