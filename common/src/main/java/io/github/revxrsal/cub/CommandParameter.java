@@ -154,6 +154,6 @@ public interface CommandParameter {
      *
      * @return The declaring command for this parameter
      */
-    @AvailableSince("1.1") @NotNull HandledCommand getDeclaringCommand();
+    @AvailableSince("1.3.0") @NotNull HandledCommand getDeclaringCommand();
 
 }

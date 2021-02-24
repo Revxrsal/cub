@@ -60,7 +60,7 @@ public interface ParameterResolver<A, R> {
          * @param <T>   The value type
          * @return The context resolver
          */
-        @AvailableSince("1.1") static <T> ContextResolver<T> of(@NotNull T value) {
+        @AvailableSince("1.3.0") static <T> ContextResolver<T> of(@NotNull T value) {
             return (args, subject, parameter) -> value;
         }
 
@@ -73,7 +73,7 @@ public interface ParameterResolver<A, R> {
          * @param <T>   The value type
          * @return The context resolver
          */
-        @AvailableSince("1.1") static <T> ContextResolver<T> of(@NotNull Supplier<T> value) {
+        @AvailableSince("1.3.0") static <T> ContextResolver<T> of(@NotNull Supplier<T> value) {
             return (args, subject, parameter) -> value.get();
         }
 
