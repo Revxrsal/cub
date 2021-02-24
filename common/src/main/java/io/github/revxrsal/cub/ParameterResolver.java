@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * A resolver for a specific type of a {@link CommandParameter}.
@@ -49,6 +50,32 @@ public interface ParameterResolver<A, R> {
          */
         T resolve(@NotNull @Unmodifiable List<String> args, @NotNull CommandSubject subject, @NotNull CommandParameter parameter) throws Throwable;
 
+        /**
+         * Returns a context resolver that returns a static value. This
+         * is a simpler way for adding constant values without having to
+         * deal with lambdas.
+         *
+         * @param value The value to return
+         * @param <T>   The value type
+         * @return The context resolver
+         */
+        static <T> ContextResolver<T> of(@NotNull T value) {
+            return (args, subject, parameter) -> value;
+        }
+
+        /**
+         * Returns a context resolver that returns a supplier value. This
+         * is a simpler way for adding values without having to deal
+         * with lambdas.
+         *
+         * @param value The value supplier
+         * @param <T>   The value type
+         * @return The context resolver
+         */
+        static <T> ContextResolver<T> of(@NotNull Supplier<T> value) {
+            return (args, subject, parameter) -> value.get();
+        }
+
     }
 
     /**
@@ -71,6 +98,7 @@ public interface ParameterResolver<A, R> {
          */
         @Contract(mutates = "param1")
         T resolve(@NotNull ArgumentStack args, @NotNull CommandSubject subject, @NotNull CommandParameter parameter) throws Throwable;
+
     }
 
 }
