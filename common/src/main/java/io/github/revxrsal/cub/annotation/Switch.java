@@ -15,11 +15,11 @@ import java.lang.annotation.Target;
 public @interface Switch {
 
     /**
-     * The switch / flag name
+     * The switch / flag name. If left empty, the parameter name will be used.
      *
      * @return The switch name
      */
-    String value();
+    String value() default "";
 
     /**
      * Returns the default value of this switch
