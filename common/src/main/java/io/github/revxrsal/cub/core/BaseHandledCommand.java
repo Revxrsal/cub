@@ -104,12 +104,6 @@ public class BaseHandledCommand implements HandledCommand {
                 name = subcommand.value();
                 aliases = Utils.immutable(subcommand.aliases());
             }
-            setProperties0();
-            if (Future.class.isAssignableFrom(((Method) ae).getReturnType())
-                    || CompletionStage.class.isAssignableFrom(((Method) ae).getReturnType())) {
-                async = true;
-                executor = ASYNC;
-            }
             ensureAccessible((Method) ae);
             Parameter[] parameters = ((Method) ae).getParameters();
             for (int index = 0; index < parameters.length; index++) {
@@ -146,6 +140,13 @@ public class BaseHandledCommand implements HandledCommand {
                     throw new IllegalArgumentException("Cannot use @Switch on non-boolean parameters (" + param.getType().getSimpleName() + " " + param.getName() + ")");
                 params.add(param);
             }
+            setProperties0();
+            if (Future.class.isAssignableFrom(((Method) ae).getReturnType())
+                    || CompletionStage.class.isAssignableFrom(((Method) ae).getReturnType())) {
+                async = true;
+                executor = ASYNC;
+            }
+
             method = bind(MethodHandles.lookup().unreflect((Method) ae), instance);
             Type returnType = ((Method) ae).getGenericReturnType();
             Class<?> crt = ((Method) ae).getReturnType();

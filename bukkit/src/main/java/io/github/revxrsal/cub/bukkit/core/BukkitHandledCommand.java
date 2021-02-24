@@ -1,15 +1,17 @@
 package io.github.revxrsal.cub.bukkit.core;
 
 import io.github.revxrsal.cub.ArgumentStack;
+import io.github.revxrsal.cub.CommandParameter;
 import io.github.revxrsal.cub.HandledCommand;
+import io.github.revxrsal.cub.ParameterResolver;
 import io.github.revxrsal.cub.bukkit.BukkitCommandSubject;
+import io.github.revxrsal.cub.bukkit.TabSuggestionProvider;
 import io.github.revxrsal.cub.bukkit.annotation.CommandPermission;
 import io.github.revxrsal.cub.bukkit.annotation.TabCompletion;
 import io.github.revxrsal.cub.core.BaseCommandHandler;
 import io.github.revxrsal.cub.core.BaseHandledCommand;
 import io.github.revxrsal.cub.core.Utils;
 import lombok.Getter;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.PluginCommand;
@@ -22,26 +24,45 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Pattern;
 
 import static io.github.revxrsal.cub.core.BaseDispatcher.SPLIT;
+import static io.github.revxrsal.cub.core.Utils.c;
 
 @Getter
 class BukkitHandledCommand extends BaseHandledCommand implements io.github.revxrsal.cub.bukkit.BukkitHandledCommand {
 
-    private List<String> tabCompletions;
+    private static final Pattern BY_WALL = Pattern.compile("|");
+    private final List<TabSuggestionProvider> tabCompletions = new ArrayList<>();
 
     public BukkitHandledCommand(Plugin plugin, BukkitHandler handler, Object instance, @Nullable BaseHandledCommand parent, @Nullable AnnotatedElement ae) {
         super(handler, instance, parent, ae);
+        setProperties2();
         if (parent == null && name != null)
             registerCommandToBukkit(handler, plugin, this);
     }
 
-    @Override protected void setProperties() {
-        tabCompletions = Arrays.asList(SPLIT.split(annReader.get(TabCompletion.class, TabCompletion::value, "")));
+    private void setProperties2() {
+        TabCompletion tc = annReader.get(TabCompletion.class);
+        List<String> completions = tc == null || tc.value().isEmpty() ? Collections.emptyList() : Arrays.asList(SPLIT.split(tc.value()));
+        if (completions.isEmpty()) {
+            for (CommandParameter parameter : getParameters()) {
+                if (parameter.getResolver() instanceof ParameterResolver.ContextResolver ||
+                        (parameter.getMethodIndex() == 0 && BukkitDispatcher.isSender(parameter.getType()))) continue;
+                TabSuggestionProvider found = ((BukkitHandler) handler).tabByParam.getOrDefault(parameter.getType(), TabSuggestionProvider.EMPTY);
+                tabCompletions.add(found);
+            }
+        } else {
+            for (String id : completions) {
+                if (id.startsWith("@")) {
+                    tabCompletions.add(c(((BukkitHandler) handler).tab.get(id), "Invalid tab completion ID: " + id));
+                } else {
+                    List<String> values = Arrays.asList(BY_WALL.split(id));
+                    tabCompletions.add((args, sender, command, bukkitCommand) -> values);
+                }
+            }
+        }
         CommandPermission permission = annReader.get(CommandPermission.class);
         if (permission != null) {
             Permission p = new Permission(permission.value(), permission.access());
@@ -89,15 +110,10 @@ class BukkitHandledCommand extends BaseHandledCommand implements io.github.revxr
         if (tabCompletions.isEmpty() || args.size() == 0) return Collections.emptyList();
         int index = args.size() - 1;
         try {
-            String found = tabCompletions.get(index);
-            if (found.startsWith("@")) {
-                Collection<String> tab = ((BukkitHandler) handler).tab.get(found.substring(1))
-                        .getSuggestions(args.asImmutableList(), sender, this, bukkitCommand);
-                if (tab == null) return BukkitTab.playerList(args.get(args.size() - 1), sender);
-                return tab;
-            } else {
-                return Arrays.asList(StringUtils.split(found, '|'));
-            }
+            Collection<String> tab = tabCompletions.get(index)
+                    .getSuggestions(args.asImmutableList(), sender, this, bukkitCommand);
+            if (tab == null) return BukkitTab.playerList(args.get(args.size() - 1), sender);
+            return tab;
         } catch (Throwable e) {
             return Collections.emptyList();
         }

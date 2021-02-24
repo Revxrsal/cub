@@ -35,6 +35,7 @@ import static io.github.revxrsal.cub.core.Utils.*;
 public final class BukkitHandler extends BaseCommandHandler implements BukkitCommandHandler {
 
     final Map<String, TabSuggestionProvider> tab = new HashMap<>();
+    final Map<Class<?>, TabSuggestionProvider> tabByParam = new HashMap<>();
 
     final Plugin plugin;
 
@@ -78,14 +79,19 @@ public final class BukkitHandler extends BaseCommandHandler implements BukkitCom
                 completions.add(player.getName());
             return completions;
         });
+        registerParameterTab(PlayerSelector.class, "selectors");
         registerTabSuggestion("players", (args, sender, command, bukkitCommand) -> null); // we handle that later on.
+        registerParameterTab(Player.class, "players");
+        registerParameterTab(OfflinePlayer.class, "players");
         registerTabSuggestion("worlds", (args, sender, command, cmd) -> {
             List<String> suggestions = new ArrayList<>();
             for (World world : Bukkit.getWorlds())
                 suggestions.add(world.getName());
             return suggestions;
         });
+        registerParameterTab(World.class, "worlds");
         registerContextResolver(CommandSender.class, (args, subject, parameter) -> ((BukkitSubject) subject).getSender());
+        registerContextResolver(plugin.getClass(), (ContextResolver) ContextResolver.of(plugin));
         registerContextResolver(ConsoleCommandSender.class, ContextResolver.of(Bukkit.getConsoleSender()));
         registerContextResolver(BukkitCommandSubject.class, (args, sender, parameter) -> (BukkitCommandSubject) sender);
         setExceptionHandler(DefaultExceptionHandler.INSTANCE);
@@ -141,6 +147,16 @@ public final class BukkitHandler extends BaseCommandHandler implements BukkitCom
     public BukkitCommandHandler registerStaticTabSuggestion(@NotNull String suggestionID, @NotNull String... completions) {
         ImmutableList<String> values = ImmutableList.copyOf(completions);
         tab.put(n(suggestionID, "id"), (args, sender, command, bukkitCommand) -> values);
+        return this;
+    }
+
+    @Override public BukkitCommandHandler registerParameterTab(@NotNull Class<?> parameterType, @NotNull TabSuggestionProvider provider) {
+        tabByParam.put(n(parameterType, "parameterType"), n(provider, "provider"));
+        return this;
+    }
+
+    @Override public BukkitCommandHandler registerParameterTab(@NotNull Class<?> parameterType, @NotNull String providerID) {
+        tabByParam.put(n(parameterType, "parameterType"), c(tab.get(providerID), "No such suggestion provider: " + providerID));
         return this;
     }
 

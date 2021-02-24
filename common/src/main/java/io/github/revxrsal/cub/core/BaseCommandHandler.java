@@ -200,7 +200,7 @@ public class BaseCommandHandler implements CommandHandler {
 
     @Override public CommandHandler registerGlobalCondition(@NotNull CommandCondition condition) {
         globalConditions.add(n(condition, "condition"));
-        return null;
+        return this;
     }
 
     public <T> CommandHandler registerTypeResolver(@NotNull Class<T> type, ParameterResolver.@NotNull ValueResolver<T> resolver) {

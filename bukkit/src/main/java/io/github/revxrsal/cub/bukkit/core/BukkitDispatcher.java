@@ -17,7 +17,11 @@ class BukkitDispatcher extends BaseDispatcher implements CommandExecutor {
         super(handler);
     }
 
-    @Override protected boolean isPossibleSender(@NotNull Class<?> v) {
+    @Override public boolean isPossibleSender(@NotNull Class<?> v) {
+        return isSender(v);
+    }
+
+    public static boolean isSender(@NotNull Class<?> v) {
         return Player.class.isAssignableFrom(v) || CommandSender.class.isAssignableFrom(v);
     }
 

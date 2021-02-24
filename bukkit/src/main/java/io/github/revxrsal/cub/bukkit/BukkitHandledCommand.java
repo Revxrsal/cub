@@ -15,6 +15,6 @@ public interface BukkitHandledCommand extends HandledCommand {
      *
      * @return The command completions
      */
-    @NotNull List<String> getTabCompletions();
+    @NotNull List<TabSuggestionProvider> getTabCompletions();
 
 }
