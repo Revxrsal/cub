@@ -1,6 +1,7 @@
 package io.github.revxrsal.cub;
 
 import io.github.revxrsal.cub.exception.CommandExceptionHandler;
+import org.jetbrains.annotations.ApiStatus.AvailableSince;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -59,7 +60,7 @@ public interface ParameterResolver<A, R> {
          * @param <T>   The value type
          * @return The context resolver
          */
-        static <T> ContextResolver<T> of(@NotNull T value) {
+        @AvailableSince("1.1") static <T> ContextResolver<T> of(@NotNull T value) {
             return (args, subject, parameter) -> value;
         }
 
@@ -72,7 +73,7 @@ public interface ParameterResolver<A, R> {
          * @param <T>   The value type
          * @return The context resolver
          */
-        static <T> ContextResolver<T> of(@NotNull Supplier<T> value) {
+        @AvailableSince("1.1") static <T> ContextResolver<T> of(@NotNull Supplier<T> value) {
             return (args, subject, parameter) -> value.get();
         }
 

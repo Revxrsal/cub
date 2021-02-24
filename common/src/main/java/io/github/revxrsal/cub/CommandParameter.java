@@ -1,6 +1,7 @@
 package io.github.revxrsal.cub;
 
 import io.github.revxrsal.cub.annotation.*;
+import org.jetbrains.annotations.ApiStatus.AvailableSince;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -153,6 +154,6 @@ public interface CommandParameter {
      *
      * @return The declaring command for this parameter
      */
-    @NotNull HandledCommand getDeclaringCommand();
+    @AvailableSince("1.1") @NotNull HandledCommand getDeclaringCommand();
 
 }

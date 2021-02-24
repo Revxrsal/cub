@@ -13,7 +13,7 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'com.github.johnrengelman.shadow'
 
-def projectVersion = "1.0"
+def projectVersion = "1.1"
 
 subprojects {
 

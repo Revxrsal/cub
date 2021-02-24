@@ -27,7 +27,7 @@ import static io.github.revxrsal.cub.core.Utils.n;
  * types.
  *
  * @author Kevin Bourrillion
- * @since 1.0
+ * @since 1.1
  */
 public final class Primitives { // legally stolen from Guava
   private Primitives() {}
