@@ -62,6 +62,7 @@ public class BaseCommandHandler implements CommandHandler {
         registerTypeResolver(Boolean.class, (a, b, parameter) -> resolveBoolean(a));
         registerContextResolver(CommandHandler.class, (args, sender, parameter) -> BaseCommandHandler.this);
         registerContextResolver(CommandSubject.class, (args, sender, parameter) -> sender);
+        registerContextResolver(HandledCommand.class, (args, sender, parameter) -> parameter.getDeclaringCommand());
         registerGlobalCondition((subject, args, command, context) -> {
             if (!command.getPermission().canExecute(subject))
                 throw new MissingPermissionException(command.getPermission());

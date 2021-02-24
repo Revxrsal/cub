@@ -148,4 +148,11 @@ public interface CommandParameter {
      */
     @NotNull CommandHandler getCommandHandler();
 
+    /**
+     * Returns the command that declares this parameter
+     *
+     * @return The declaring command for this parameter
+     */
+    @NotNull HandledCommand getDeclaringCommand();
+
 }

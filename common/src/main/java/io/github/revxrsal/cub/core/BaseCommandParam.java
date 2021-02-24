@@ -2,6 +2,7 @@ package io.github.revxrsal.cub.core;
 
 import io.github.revxrsal.cub.CommandHandler;
 import io.github.revxrsal.cub.CommandParameter;
+import io.github.revxrsal.cub.HandledCommand;
 import io.github.revxrsal.cub.ParameterResolver;
 import io.github.revxrsal.cub.annotation.Flag;
 import io.github.revxrsal.cub.annotation.Switch;
@@ -22,6 +23,7 @@ final class BaseCommandParam implements CommandParameter {
     private final String def;
     private final boolean consumeString;
     private final CommandHandler handler;
+    private final HandledCommand command;
     private final ParameterResolver<?, ?> resolver;
     private final boolean optional;
     private final @Nullable Switch switchAnn;
@@ -68,7 +70,7 @@ final class BaseCommandParam implements CommandParameter {
     }
 
     @Override public @Nullable String getSwitchName() {
-        return isSwitch() ? switchAnn.value() : null;
+        return isSwitch() ? (switchAnn.value().isEmpty() ? getName() : switchAnn.value()) : null;
     }
 
     @Override public boolean getDefaultSwitch() {
@@ -89,6 +91,10 @@ final class BaseCommandParam implements CommandParameter {
 
     @Override public @NotNull CommandHandler getCommandHandler() {
         return handler;
+    }
+
+    @Override public @NotNull HandledCommand getDeclaringCommand() {
+        return command;
     }
 
     @Override public @NotNull <T> ParameterResolver<?, T> getResolver() {
