@@ -26,6 +26,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static io.github.revxrsal.cub.core.BaseDispatcher.SPLIT;
 import static io.github.revxrsal.cub.core.Utils.c;
@@ -50,7 +51,9 @@ class BukkitHandledCommand extends BaseHandledCommand implements io.github.revxr
             for (CommandParameter parameter : getParameters()) {
                 if (parameter.getResolver() instanceof ParameterResolver.ContextResolver ||
                         (parameter.getMethodIndex() == 0 && BukkitDispatcher.isSender(parameter.getType()))) continue;
-                TabSuggestionProvider found = ((BukkitHandler) handler).tabByParam.getOrDefault(parameter.getType(), TabSuggestionProvider.EMPTY);
+                TabSuggestionProvider found = ((BukkitHandler) handler).tabByParam.getOrDefault(parameter.getType(),
+                        parameter.getType().isEnum() ? (args, sender, command, bukkitCommand) -> Arrays.stream(parameter.getType().getEnumConstants()).map(Object::toString).collect(Collectors.toList()) : TabSuggestionProvider.EMPTY
+                        );
                 tabCompletions.add(found);
             }
         } else {
