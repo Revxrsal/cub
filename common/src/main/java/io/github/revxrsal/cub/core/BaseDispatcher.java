@@ -94,11 +94,10 @@ public abstract class BaseDispatcher {
             if (parameter.isFlag()) {
                 String look = handler.flagPrefix + parameter.getFlagName();
                 int index = args.indexOf(look);
-                boolean provided = args.remove(look);
+                args.remove(look);
                 if (index == -1) {
                     if (parameter.isOptional()) {
                         if (parameter.getDefaultValue() != null) {
-//                            args.add(look);
                             args.add(parameter.getDefaultValue());
                             index = args.size() - 2;
                         } else {
