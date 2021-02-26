@@ -26,6 +26,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static io.github.revxrsal.cub.core.BaseDispatcher.SPLIT;
 import static io.github.revxrsal.cub.core.Utils.c;
@@ -48,9 +49,16 @@ class BukkitHandledCommand extends BaseHandledCommand implements io.github.revxr
         List<String> completions = tc == null || tc.value().isEmpty() ? Collections.emptyList() : Arrays.asList(SPLIT.split(tc.value()));
         if (completions.isEmpty()) {
             for (CommandParameter parameter : getParameters()) {
+                if (parameter.isSwitch() || parameter.isFlag())continue;
                 if (parameter.getResolver() instanceof ParameterResolver.ContextResolver ||
                         (parameter.getMethodIndex() == 0 && BukkitDispatcher.isSender(parameter.getType()))) continue;
                 TabSuggestionProvider found = ((BukkitHandler) handler).tabByParam.getOrDefault(parameter.getType(), TabSuggestionProvider.EMPTY);
+                if (found == TabSuggestionProvider.EMPTY && parameter.getType().isEnum()) {
+                    List<String> enums = Arrays.stream(parameter.getType().getEnumConstants())
+                            .map(e -> ((Enum) e).name().toLowerCase())
+                            .collect(Collectors.toList());
+                    found = (args, sender, command, bukkitCommand) -> enums;
+                }
                 tabCompletions.add(found);
             }
         } else {
@@ -111,10 +119,8 @@ class BukkitHandledCommand extends BaseHandledCommand implements io.github.revxr
         if (tabCompletions.isEmpty() || args.size() == 0) return Collections.emptyList();
         int index = args.size() - 1;
         try {
-            Collection<String> tab = tabCompletions.get(index)
+            return tabCompletions.get(index)
                     .getSuggestions(args.asImmutableList(), sender, this, bukkitCommand);
-            if (tab == null) return BukkitTab.playerList(args.get(args.size() - 1), sender);
-            return tab;
         } catch (Throwable e) {
             return Collections.emptyList();
         }
