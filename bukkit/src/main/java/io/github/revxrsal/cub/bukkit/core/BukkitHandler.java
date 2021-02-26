@@ -169,4 +169,13 @@ public final class BukkitHandler extends BaseCommandHandler implements BukkitCom
             ia.add(((BukkitSubject) sender).getSender());
     }
 
+    public TabSuggestionProvider getTabs(@NotNull Class<?> type) {
+        TabSuggestionProvider provider = tabByParam.getOrDefault(type, TabSuggestionProvider.EMPTY);
+        if (provider == TabSuggestionProvider.EMPTY && type.isEnum()) {
+            List<String> completions = BukkitTab.enums(type);
+            tabByParam.put(type, provider = (args, sender, command, bukkitCommand) -> completions);
+        }
+        return provider;
+    }
+
 }

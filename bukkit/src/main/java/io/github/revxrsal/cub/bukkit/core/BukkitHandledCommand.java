@@ -49,16 +49,10 @@ class BukkitHandledCommand extends BaseHandledCommand implements io.github.revxr
         List<String> completions = tc == null || tc.value().isEmpty() ? Collections.emptyList() : Arrays.asList(SPLIT.split(tc.value()));
         if (completions.isEmpty()) {
             for (CommandParameter parameter : getParameters()) {
-                if (parameter.isSwitch() || parameter.isFlag())continue;
+                if (parameter.isSwitch() || parameter.isFlag()) continue;
                 if (parameter.getResolver() instanceof ParameterResolver.ContextResolver ||
                         (parameter.getMethodIndex() == 0 && BukkitDispatcher.isSender(parameter.getType()))) continue;
-                TabSuggestionProvider found = ((BukkitHandler) handler).tabByParam.getOrDefault(parameter.getType(), TabSuggestionProvider.EMPTY);
-                if (found == TabSuggestionProvider.EMPTY && parameter.getType().isEnum()) {
-                    List<String> enums = Arrays.stream(parameter.getType().getEnumConstants())
-                            .map(e -> ((Enum) e).name().toLowerCase())
-                            .collect(Collectors.toList());
-                    found = (args, sender, command, bukkitCommand) -> enums;
-                }
+                TabSuggestionProvider found = ((BukkitHandler) handler).getTabs(parameter.getType());
                 tabCompletions.add(found);
             }
         } else {

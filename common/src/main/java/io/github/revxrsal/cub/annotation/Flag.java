@@ -23,10 +23,10 @@ import java.lang.annotation.Target;
 public @interface Flag {
 
     /**
-     * The flag name
+     * The flag name. If left empty, the parameter name will be used.
      *
      * @return The flag name
      */
-    String value();
+    String value() default "";
 
 }

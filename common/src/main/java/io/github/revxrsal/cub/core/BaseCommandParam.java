@@ -86,7 +86,7 @@ final class BaseCommandParam implements CommandParameter {
     }
 
     @Override public @Nullable String getFlagName() {
-        return isFlag() ? flag.value() : null;
+        return isFlag() ? (flag.value().isEmpty() ? getName() : flag.value()) : null;
     }
 
     @Override public @NotNull CommandHandler getCommandHandler() {

@@ -16,11 +16,14 @@ import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static io.github.revxrsal.cub.core.BaseDispatcher.splitWithoutQuotes;
 
 final class BukkitTab implements TabCompleter {
+
+    private static final Map<Class<?>, List<String>> enumCache = new ConcurrentHashMap<>();
 
     private final BukkitHandler handler;
 
@@ -59,9 +62,8 @@ final class BukkitTab implements TabCompleter {
                     if (index == -1) {
                         completions.add(handler.getFlagPrefix() + parameter.getFlagName() + " ");
                     } else if (index == stack.asImmutableList().size() - 2) {
-                        completions.addAll(handler.tabByParam.getOrDefault(parameter.getType(), TabSuggestionProvider.EMPTY)
+                        completions.addAll(handler.getTabs(parameter.getType())
                                 .getSuggestions(stack.asImmutableList(), subject, found, bukkitCommand));
-
                     }
                 }
             } catch (Throwable ignored) {
@@ -100,4 +102,11 @@ final class BukkitTab implements TabCompleter {
         }
         return players;
     }
+
+    static List<String> enums(@NotNull Class<?> type) {
+        return enumCache.computeIfAbsent(type, cl -> Arrays.stream(cl.getEnumConstants())
+                .map(e -> ((Enum) e).name().toLowerCase())
+                .collect(Collectors.toList()));
+    }
+
 }
