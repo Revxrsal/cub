@@ -80,7 +80,7 @@ public final class BukkitHandler extends BaseCommandHandler implements BukkitCom
             return completions;
         });
         registerParameterTab(PlayerSelector.class, "selectors");
-        registerTabSuggestion("players", (args, sender, command, bukkitCommand) -> null); // we handle that later on.
+        registerTabSuggestion("players", (args, sender, command, bukkitCommand) -> BukkitTab.playerList(args.get(args.size() - 1), sender)); // we handle that later on.
         registerParameterTab(Player.class, "players");
         registerParameterTab(OfflinePlayer.class, "players");
         registerTabSuggestion("worlds", (args, sender, command, cmd) -> {

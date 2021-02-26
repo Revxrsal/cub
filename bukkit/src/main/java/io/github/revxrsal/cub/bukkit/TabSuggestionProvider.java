@@ -2,13 +2,13 @@ package io.github.revxrsal.cub.bukkit;
 
 import io.github.revxrsal.cub.HandledCommand;
 import io.github.revxrsal.cub.bukkit.core.BukkitHandler;
+import io.github.revxrsal.cub.core.Utils;
 import org.bukkit.command.Command;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * A provider for tab completions.
@@ -31,10 +31,26 @@ public interface TabSuggestionProvider {
      * @param bukkitCommand Bukkit's {@link Command} for this command
      * @return The command suggestions.
      */
-    @Nullable
+    @NotNull
     Collection<String> getSuggestions(@NotNull List<String> args,
                                       @NotNull BukkitCommandSubject sender,
                                       @NotNull HandledCommand command,
                                       @NotNull Command bukkitCommand) throws Throwable;
 
+    /**
+     * Composes the two {@link TabSuggestionProvider}s into one provider that returns
+     * the completions from both.
+     *
+     * @param other Other provider to merge with
+     * @return The new provider
+     */
+    @Contract("null -> this; !null -> !null")
+    default TabSuggestionProvider compose(@Nullable TabSuggestionProvider other) {
+        if (other == null) return this;
+        return (args, sender, command, bukkitCommand) -> {
+            Set<String> completions = new HashSet<>(other.getSuggestions(args, sender, command, bukkitCommand));
+            completions.addAll(getSuggestions(args, sender, command, bukkitCommand));
+            return completions;
+        };
+    }
 }

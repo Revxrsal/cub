@@ -5,6 +5,7 @@ import io.github.revxrsal.cub.ArgumentStack;
 import io.github.revxrsal.cub.CommandParameter;
 import io.github.revxrsal.cub.HandledCommand;
 import io.github.revxrsal.cub.bukkit.BukkitCommandSubject;
+import io.github.revxrsal.cub.bukkit.TabSuggestionProvider;
 import io.github.revxrsal.cub.core.LinkedArgumentStack;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -31,6 +32,7 @@ final class BukkitTab implements TabCompleter {
         ArgumentStack stack = new LinkedArgumentStack(handler, splitWithoutQuotes(args));
         if (stack.isEmpty()) return ImmutableList.of();
         Set<String> completions = new HashSet<>();
+        BukkitSubject subject = new BukkitSubject(sender);
         HandledCommand parent = handler.getCommands().get(bukkitCommand.getName());
         if (parent == null) return ImmutableList.of();
         if (args.length == 1) {
@@ -41,19 +43,34 @@ final class BukkitTab implements TabCompleter {
         for (HandledCommand subcommand : found.getSubcommands().values())
             completions.add(subcommand.getName());
         if (!((BukkitHandledCommand) found).getTabCompletions().isEmpty()) {
-            completions.addAll(((BukkitHandledCommand) found).resolveTab(stack, new BukkitSubject(sender), bukkitCommand));
+            completions.addAll(((BukkitHandledCommand) found).resolveTab(stack, subject, bukkitCommand));
         }
         String last = stack.asImmutableList().get(stack.asImmutableList().size() - 1);
         if (last.startsWith(handler.getSwitchPrefix())) {
             for (CommandParameter parameter : found.getParameters())
                 if (parameter.isSwitch())
-                    completions.add(handler.getSwitchPrefix() + parameter.getSwitchName());
+                    if (!stack.asImmutableList().contains(handler.getSwitchPrefix() + parameter.getSwitchName()))
+                        completions.add(handler.getSwitchPrefix() + parameter.getSwitchName());
         }
-        List<String> completionList = new ArrayList<>(completions);
-        completionList.sort(String.CASE_INSENSITIVE_ORDER);
+        for (CommandParameter parameter : found.getParameters()) {
+            try {
+                if (parameter.isFlag()) {
+                    int index = stack.asImmutableList().indexOf(handler.getFlagPrefix() + parameter.getFlagName());
+                    if (index == -1) {
+                        completions.add(handler.getFlagPrefix() + parameter.getFlagName() + " ");
+                    } else if (index == stack.asImmutableList().size() - 2) {
+                        completions.addAll(handler.tabByParam.getOrDefault(parameter.getType(), TabSuggestionProvider.EMPTY)
+                                .getSuggestions(stack.asImmutableList(), subject, found, bukkitCommand));
+
+                    }
+                }
+            } catch (Throwable ignored) {
+            }
+        }
         return completions.stream()
                 .filter(c -> StringUtil.startsWithIgnoreCase(c, last))
                 .sorted(String.CASE_INSENSITIVE_ORDER)
+                .distinct()
                 .collect(Collectors.toList());
     }
 
