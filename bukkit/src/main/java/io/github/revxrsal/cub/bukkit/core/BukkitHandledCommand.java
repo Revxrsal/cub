@@ -80,6 +80,7 @@ class BukkitHandledCommand extends BaseHandledCommand implements io.github.revxr
             cmd.setExecutor(dispatcher);
             cmd.setTabCompleter(new BukkitTab(handler));
             cmd.setDescription(command.getDescription() == null ? "" : command.getDescription());
+            cmd.setAliases(command.getAliases());
         } catch (ReflectiveOperationException e) {
             e.printStackTrace();
         }
