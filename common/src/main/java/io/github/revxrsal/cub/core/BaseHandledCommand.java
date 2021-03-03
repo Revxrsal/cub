@@ -18,7 +18,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static io.github.revxrsal.cub.core.BaseDispatcher.sneakyThrow;

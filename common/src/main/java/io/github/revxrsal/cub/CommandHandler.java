@@ -3,6 +3,7 @@ package io.github.revxrsal.cub;
 import io.github.revxrsal.cub.annotation.*;
 import io.github.revxrsal.cub.exception.CommandException;
 import io.github.revxrsal.cub.exception.CommandExceptionHandler;
+import org.jetbrains.annotations.ApiStatus.AvailableSince;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -213,5 +214,34 @@ public interface CommandHandler {
      * @throws IllegalArgumentException if the prefix is empty
      */
     CommandHandler setFlagPrefix(@NotNull String prefix);
+
+    /**
+     * Returns the {@link CommandHelpWriter} used to generate the
+     * appropriate help entries. If not set, a default one will be used.
+     * <p>
+     * See {@link CommandHelpWriter} for more information.
+     *
+     * @param <T> The command help writer entry type
+     * @return The writer
+     * @since 1.7.0
+     * @see CommandHelp
+     * @see CommandHelpWriter
+     */
+    @AvailableSince("1.7.0") @NotNull <T> CommandHelpWriter<T> getHelpWriter();
+
+    /**
+     * Sets the {@link CommandHelpWriter} used to generate the
+     * appropriate help entries.
+     * <p>
+     * See {@link CommandHelpWriter} for more information.
+     *
+     * @param writer New writer to use.
+     * @param <T>    The command help writer entry type
+     * @return The writer
+     * @since 1.7.0
+     * @see CommandHelp
+     * @see CommandHelpWriter
+     */
+    @AvailableSince("1.7.0") <T> CommandHandler setHelpWriter(@NotNull CommandHelpWriter<T> writer);
 
 }

@@ -10,6 +10,7 @@ import io.github.revxrsal.cub.exception.InvalidValueException;
 import io.github.revxrsal.cub.exception.MissingPermissionException;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.lang.invoke.MethodHandle;
@@ -34,10 +35,13 @@ public class BaseCommandHandler implements CommandHandler {
     final Map<Class<?>, ParameterResolver.ContextResolver<?>> cxtResolvers = new HashMap<>();
     final Map<String, CommandCondition> conditions = new HashMap<>();
     final List<CommandCondition> globalConditions = new ArrayList<>();
-    protected final Map<Class<?>, Supplier<?>> dependencies = new HashMap<>();
-
     final HashSetMultimap<Class<?>, ParameterValidator<?>> validators = new HashSetMultimap<>();
     final Map<Class<?>, ResponseHandler> responseHandlers = new HashMap<>();
+
+    protected final Map<Class<?>, Supplier<?>> dependencies = new HashMap<>();
+
+    @Nullable CommandHelpWriter<?> helpWriter;
+
     String switchPrefix = "-";
     String flagPrefix = "-";
 
@@ -63,6 +67,7 @@ public class BaseCommandHandler implements CommandHandler {
         registerContextResolver(CommandHandler.class, (args, sender, parameter) -> BaseCommandHandler.this);
         registerContextResolver(CommandSubject.class, (args, sender, parameter) -> sender);
         registerContextResolver(HandledCommand.class, (args, sender, parameter) -> parameter.getDeclaringCommand());
+        cxtResolvers.put(CommandHelp.class, new BaseCommandHelp.Resolver(this));
         registerGlobalCondition((subject, args, command, context) -> {
             if (!command.getPermission().canExecute(subject))
                 throw new MissingPermissionException(command.getPermission());
@@ -96,6 +101,16 @@ public class BaseCommandHandler implements CommandHandler {
         if (prefix.isEmpty())
             throw new IllegalArgumentException("Switch prefix cannot be an empty string!");
         flagPrefix = prefix;
+        return this;
+    }
+
+    @Override public @NotNull <T> CommandHelpWriter<T> getHelpWriter() {
+        return (CommandHelpWriter<T>) helpWriter;
+    }
+
+    @Override public <T> CommandHandler setHelpWriter(@NotNull CommandHelpWriter<T> writer) {
+        n(writer, "CommandHelpWriter cannot be null!");
+        helpWriter = writer;
         return this;
     }
 
