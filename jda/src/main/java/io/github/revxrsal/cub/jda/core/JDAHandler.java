@@ -29,7 +29,7 @@ public final class JDAHandler extends BaseCommandHandler implements JDACommandHa
     private static final ValueType CHANNEL = new ValueType("channel");
     private static final ValueType ROLE = new ValueType("role");
 
-    private static final Pattern SNOWFLAKE = Pattern.compile("<(@|@!|&|#)(?<snowflake>\\d{18})>");
+    private static final Pattern SNOWFLAKE = Pattern.compile("<(@!|@|@&|#)(?<snowflake>\\d{18})>");
 
     private final JDA jda;
     private final Settings settings;
@@ -84,7 +84,7 @@ public final class JDAHandler extends BaseCommandHandler implements JDACommandHa
         private final BiFunction<Guild, String, T> idToChannel;
         private @Nullable final F<T> byId;
 
-        @Override public T resolve(@NotNull ArgumentStack args, @NotNull CommandSubject csubject, @NotNull CommandParameter parameter) throws Throwable {
+        @Override public T resolve(@NotNull ArgumentStack args, @NotNull CommandSubject csubject, @NotNull CommandParameter parameter) {
             String supplied = args.popForParameter(parameter);
             Matcher matcher = SNOWFLAKE.matcher(supplied); // test for mentions
             if (matcher.find()) {
@@ -104,7 +104,7 @@ public final class JDAHandler extends BaseCommandHandler implements JDACommandHa
         private @Nullable final F<T> byId;
         private final ValueType type;
 
-        @Override public T resolve(@NotNull ArgumentStack args, @NotNull CommandSubject csubject, @NotNull CommandParameter parameter) throws Throwable {
+        @Override public T resolve(@NotNull ArgumentStack args, @NotNull CommandSubject csubject, @NotNull CommandParameter parameter) {
             String supplied = args.popForParameter(parameter);
             Matcher matcher = SNOWFLAKE.matcher(supplied); // test for mentions
             if (matcher.find()) {
