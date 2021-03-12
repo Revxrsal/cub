@@ -42,7 +42,7 @@ public final class BukkitHandler extends BaseCommandHandler implements BukkitCom
     public BukkitHandler(@NotNull Plugin plugin) {
         super();
         this.plugin = plugin;
-        super.dependencies.put(plugin.getClass(), () -> plugin);
+        registerDependency((Class) plugin.getClass(), plugin);
         registerTypeResolver(Player.class, (a, b, parameter) -> {
             String name = a.pop();
             if (name.equalsIgnoreCase("me")) return ((Player) b);
@@ -126,10 +126,12 @@ public final class BukkitHandler extends BaseCommandHandler implements BukkitCom
         }
     }
 
-    @Override public CommandHandler registerCommand(@NotNull Object instance) {
-        BukkitHandledCommand command = new BukkitHandledCommand(plugin, this, instance, null, null);
-        if (command.getName() != null) addCommand(command);
-        setDependencies(instance);
+    @Override public CommandHandler registerCommand(@NotNull Object... instances) {
+        for (Object instance : instances) {
+            BukkitHandledCommand command = new BukkitHandledCommand(plugin, this, instance, null, null);
+            if (command.getName() != null) addCommand(command);
+            setDependencies(instance);
+        }
         return this;
     }
 

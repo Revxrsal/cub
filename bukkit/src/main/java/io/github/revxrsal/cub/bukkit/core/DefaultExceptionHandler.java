@@ -4,7 +4,6 @@ import io.github.revxrsal.cub.CommandContext;
 import io.github.revxrsal.cub.CommandHandler;
 import io.github.revxrsal.cub.CommandSubject;
 import io.github.revxrsal.cub.HandledCommand;
-import io.github.revxrsal.cub.annotation.Cooldown;
 import io.github.revxrsal.cub.bukkit.SenderNotPlayerException;
 import io.github.revxrsal.cub.exception.*;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +13,7 @@ import java.util.List;
 
 final class DefaultExceptionHandler implements CommandExceptionHandler {
 
+    private static final String VOWELS = "aeiou";
     public static final DefaultExceptionHandler INSTANCE = new DefaultExceptionHandler();
 
     @Override public String toString() {
@@ -35,7 +35,8 @@ final class DefaultExceptionHandler implements CommandExceptionHandler {
             sender.reply("&cInvalid command: &e" + ((InvalidCommandException) e).getInput());
         } else if (e instanceof MissingParameterException) {
             MissingParameterException mpe = (MissingParameterException) e;
-            sender.reply("&cYou must specify a(n) " + mpe.getParameter().getName() + "!");
+            String article = VOWELS.indexOf(Character.toLowerCase(mpe.getParameter().getName().charAt(0))) != -1 ? "an" : "a";
+            sender.reply("&cYou must specify " + article + " " + mpe.getParameter().getName() + "!");
         } else if (e instanceof MissingPermissionException) {
             sender.reply("&cYou do not have permission to execute this command!");
         } else if (e instanceof ResolverFailedException) {

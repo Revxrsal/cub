@@ -72,9 +72,11 @@ public final class JDAHandler extends BaseCommandHandler implements JDACommandHa
         return settings;
     }
 
-    @Override public CommandHandler registerCommand(@NotNull Object instance) {
-        addCommand(new JDACommand(this, instance, null, null));
-        setDependencies(instance);
+    @Override public CommandHandler registerCommand(@NotNull Object... instances) {
+        for (Object instance : instances) {
+            addCommand(new JDACommand(this, instance, null, null));
+            setDependencies(instance);
+        }
         return this;
     }
 

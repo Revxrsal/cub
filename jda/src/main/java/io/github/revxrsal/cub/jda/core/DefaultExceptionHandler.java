@@ -12,6 +12,7 @@ import java.util.List;
 
 final class DefaultExceptionHandler implements CommandExceptionHandler {
 
+    private static final String VOWELS = "aeiou";
     public static final DefaultExceptionHandler INSTANCE = new DefaultExceptionHandler();
 
     @Override public void handleException(@NotNull CommandSubject sender,
@@ -26,7 +27,8 @@ final class DefaultExceptionHandler implements CommandExceptionHandler {
             sender.reply("**Invalid command**: " + ((InvalidCommandException) e).getInput());
         } else if (e instanceof MissingParameterException) {
             MissingParameterException mpe = (MissingParameterException) e;
-            sender.reply("You must specify a(n) " + mpe.getParameter().getName() + "!");
+            String article = VOWELS.indexOf(Character.toLowerCase(mpe.getParameter().getName().charAt(0))) != -1 ? "an" : "a";
+            sender.reply("You must specify " + article + " " + mpe.getParameter().getName() + " !");
         } else if (e instanceof MissingPermissionException) {
             sender.reply("You do not have permission to execute this command!");
         } else if (e instanceof ResolverFailedException) {
