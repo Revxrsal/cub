@@ -23,6 +23,11 @@ public class InvalidValueException extends CommandException {
      */
     public static final ValueType WORLD = new ValueType("world");
 
+    /**
+     * Passed when an invalid world is inputted.
+     */
+    public static final ValueType SUBCOMMAND = new ValueType("subcommand");
+
     private final ValueType valueType;
     private final Object value;
 

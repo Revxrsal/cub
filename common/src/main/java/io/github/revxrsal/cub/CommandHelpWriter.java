@@ -17,8 +17,8 @@ import java.util.function.Predicate;
  *            <p>
  *            Similarly, more complex types, such as chat components,
  *            can have this type as the appropriate chat component type.
+ * @since 1.7.0
  */
-@AvailableSince("1.7.0")
 public interface CommandHelpWriter<T> {
 
     /**

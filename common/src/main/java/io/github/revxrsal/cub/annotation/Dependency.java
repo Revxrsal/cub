@@ -7,12 +7,12 @@ import java.lang.annotation.Target;
 import java.util.function.Supplier;
 
 /**
- * An annotation for fields used to inject dependencies into command classes.
+ * An annotation for fields and parameters used to inject dependencies into command classes.
  *
  * @see io.github.revxrsal.cub.CommandHandler#registerDependency(Class, Object)
  * @see io.github.revxrsal.cub.CommandHandler#registerDependency(Class, Supplier)
  */
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Dependency {
 

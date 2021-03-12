@@ -11,6 +11,7 @@ import io.github.revxrsal.cub.exception.MissingPermissionException;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.lang.invoke.MethodHandle;
@@ -31,15 +32,13 @@ import static io.github.revxrsal.cub.core.Utils.*;
 public class BaseCommandHandler implements CommandHandler {
 
     final Map<String, HandledCommand> commands = new HashMap<>();
-    final Map<Class<?>, ParameterResolver.ValueResolver<?>> typeResolvers = new HashMap<>();
-    final Map<Class<?>, ParameterResolver.ContextResolver<?>> cxtResolvers = new HashMap<>();
     final Map<String, CommandCondition> conditions = new HashMap<>();
     final List<CommandCondition> globalConditions = new ArrayList<>();
     final HashSetMultimap<Class<?>, ParameterValidator<?>> validators = new HashSetMultimap<>();
     final Map<Class<?>, ResponseHandler> responseHandlers = new HashMap<>();
 
     protected final Map<Class<?>, Supplier<?>> dependencies = new HashMap<>();
-
+    protected final List<ResolverFactory<?>> resolverFactories = new ArrayList<>();
     @Nullable CommandHelpWriter<?> helpWriter;
 
     String switchPrefix = "-";
@@ -64,13 +63,29 @@ public class BaseCommandHandler implements CommandHandler {
         registerTypeResolver(Long.class, (a, b, parameter) -> num(a, Long::parseLong));
         registerTypeResolver(boolean.class, (a, b, parameter) -> resolveBoolean(a));
         registerTypeResolver(Boolean.class, (a, b, parameter) -> resolveBoolean(a));
+        registerTypeResolver(TargetHandledCommand.class, (args, subject, parameter) -> {
+            HandledCommand found = parameter.getDeclaringCommand().getParent();
+            if (found == null) found = parameter.getDeclaringCommand();
+            String text;
+            found = found.getSubcommands().get(text = args.popForParameter(parameter));
+            if (found == null)
+                throw new InvalidValueException(InvalidValueException.SUBCOMMAND, text);
+            HandledCommand finalFound = found;
+            return () -> finalFound;
+        });
         registerContextResolver(CommandHandler.class, (args, sender, parameter) -> BaseCommandHandler.this);
         registerContextResolver(CommandSubject.class, (args, sender, parameter) -> sender);
         registerContextResolver(HandledCommand.class, (args, sender, parameter) -> parameter.getDeclaringCommand());
-        cxtResolvers.put(CommandHelp.class, new BaseCommandHelp.Resolver(this));
+//        registerContextResolver((Class) CommandHelp.class, new BaseCommandHelp.Resolver(this));
+        registerContextResolver(CommandHelpWriter.class, ParameterResolver.ContextResolver.of(this::getHelpWriter));
         registerGlobalCondition((subject, args, command, context) -> {
             if (!command.getPermission().canExecute(subject))
                 throw new MissingPermissionException(command.getPermission());
+        });
+        addFactory(new EnumValueFactory());
+        addFactory((ContextResolverFactory) (parameter, command, handler) -> {
+            if (!parameter.hasAnnotation(Dependency.class)) return null;
+            return ParameterResolver.ContextResolver.of(c(dependencies.get(parameter.getType()), "No dependency supplier registered for " + parameter.getType()));
         });
         registerGlobalCondition(new CooldownCondition());
     }
@@ -104,7 +119,7 @@ public class BaseCommandHandler implements CommandHandler {
         return this;
     }
 
-    @Override public @NotNull <T> CommandHelpWriter<T> getHelpWriter() {
+    @Override public <T> CommandHelpWriter<T> getHelpWriter() {
         return (CommandHelpWriter<T>) helpWriter;
     }
 
@@ -114,9 +129,59 @@ public class BaseCommandHandler implements CommandHandler {
         return this;
     }
 
-    @Override public CommandHandler registerCommand(@NotNull Object instance) {
-        addCommand(new BaseHandledCommand(this, instance, null, null));
-        setDependencies(instance);
+    @Override public CommandHandler registerValueResolverFactory(@NotNull ValueResolverFactory factory) {
+        n(factory, "ValueResolverFactory cannot be null!");
+        addFactory(factory);
+        return this;
+    }
+
+    @Override public CommandHandler registerContextResolverFactory(@NotNull ContextResolverFactory factory) {
+        n(factory, "ContextResolverFactory cannot be null!");
+        addFactory(factory);
+        return this;
+    }
+
+    // for some reason the Java 8 compiler can't infer lambdas correctly,
+    // so we have no choice but turn them into anonymous classes.
+    @SuppressWarnings("Convert2Lambda")
+    private void addFactory(ResolverFactory factory) {
+        if (factory instanceof ValueResolverFactory) {
+            resolverFactories.add(0, (ValueResolverFactory) (parameter, command, handler) -> {
+                ParameterResolver resolver = factory.create(parameter, command, handler);
+                if (resolver == null) return null;
+                return new ParameterResolver.ValueResolver<Object>() {
+                    @Override public Object resolve(@NotNull @Unmodifiable ArgumentStack args, @NotNull CommandSubject subject, @NotNull CommandParameter parameter) throws Throwable {
+                        Object value = resolver.resolve(args, subject, parameter);
+                        for (ParameterValidator validator : getValidators(parameter.getType())) {
+                            validator.validate(value, parameter, subject);
+                        }
+                        return value;
+                    }
+                };
+            });
+        } else {
+            resolverFactories.add(0, (parameter, command, handler) -> {
+                ParameterResolver resolver = factory.create(parameter, command, handler);
+                if (resolver == null) return null;
+                return new ParameterResolver.ContextResolver<Object>() {
+                    @Override public Object resolve(@NotNull @Unmodifiable List<String> args, @NotNull CommandSubject subject, @NotNull CommandParameter parameter) throws Throwable {
+                        Object value = resolver.resolve(args, subject, parameter);
+                        for (ParameterValidator validator : getValidators(parameter.getType())) {
+                            validator.validate(value, parameter, subject);
+                        }
+                        return value;
+                    }
+                };
+            });
+        }
+
+    }
+
+    @Override public CommandHandler registerCommand(@NotNull Object... instances) {
+        for (Object instance : instances) {
+            addCommand(new BaseHandledCommand(this, instance, null, null));
+            setDependencies(instance);
+        }
         return this;
     }
 
@@ -131,8 +196,7 @@ public class BaseCommandHandler implements CommandHandler {
                     ensureAccessible(method);
                     MethodHandle handle = bind(MethodHandles.lookup().unreflect(method), resolver);
                     Class<?>[] ptypes = method.getParameterTypes();
-                    Set<ParameterValidator<?>> validators = getValidators(tr.value());
-                    typeResolvers.put(tr.value(), (a, b, parameter) -> {
+                    addFactory(ValueResolverFactory.forType(((Class) tr.value()), (a, b, parameter) -> {
                         List<Object> ia = new ArrayList<>();
                         for (Class<?> ptype : ptypes) {
                             if (ArgumentStack.class.isAssignableFrom(ptype))
@@ -146,12 +210,9 @@ public class BaseCommandHandler implements CommandHandler {
                             else if (String.class.isAssignableFrom(ptype))
                                 ia.add(a.popForParameter(parameter));
                         }
-                        Object value = handle.invokeWithArguments(ia);
-                        for (ParameterValidator validator : validators) {
-                            validator.validate(value, parameter, b);
-                        }
-                        return value;
-                    });
+
+                        return handle.invokeWithArguments(ia);
+                    }));
                 }
                 ContextResolver cr = method.getAnnotation(ContextResolver.class);
                 if (cr != null) {
@@ -159,7 +220,7 @@ public class BaseCommandHandler implements CommandHandler {
                     ensureAccessible(method);
                     MethodHandle handle = bind(MethodHandles.lookup().unreflect(method), resolver);
                     Class<?>[] ptypes = method.getParameterTypes();
-                    cxtResolvers.put(cr.value(), (a, b, parameter) -> {
+                    addFactory(ContextResolverFactory.forType((Class) cr.value(), (a, b, parameter) -> {
                         List<Object> ia = new ArrayList<>();
                         for (Class<?> ptype : ptypes) {
                             if (List.class.isAssignableFrom(ptype))
@@ -169,12 +230,8 @@ public class BaseCommandHandler implements CommandHandler {
                             else if (CommandParameter.class.isAssignableFrom(ptype))
                                 ia.add(parameter);
                         }
-                        Object value = handle.invokeWithArguments(ia);
-                        for (ParameterValidator validator : getValidators(cr.value())) {
-                            validator.validate(value, parameter, b);
-                        }
-                        return value;
-                    });
+                        return handle.invokeWithArguments(ia);
+                    }));
                 }
                 ConditionEvaluator ce = method.getAnnotation(ConditionEvaluator.class);
                 if (ce != null) {
@@ -219,22 +276,12 @@ public class BaseCommandHandler implements CommandHandler {
     }
 
     public <T> CommandHandler registerTypeResolver(@NotNull Class<T> type, ParameterResolver.@NotNull ValueResolver<T> resolver) {
-        typeResolvers.put(type, (a, b, parameter) -> {
-            Object value = resolver.resolve(a, b, parameter);
-            for (ParameterValidator validator : getValidators(type))
-                validator.validate(value, parameter, b);
-            return value;
-        });
+        addFactory(ValueResolverFactory.forType(type, resolver));
         return this;
     }
 
     public <T> CommandHandler registerContextResolver(@NotNull Class<T> type, ParameterResolver.@NotNull ContextResolver<T> resolver) {
-        cxtResolvers.put(type, (a, b, parameter) -> {
-            Object value = resolver.resolve(a, b, parameter);
-            for (ParameterValidator validator : getValidators(type))
-                validator.validate(value, parameter, b);
-            return value;
-        });
+        addFactory(ContextResolverFactory.forType(type, resolver));
         return this;
     }
 
@@ -321,6 +368,15 @@ public class BaseCommandHandler implements CommandHandler {
             default:
                 return false;
         }
+    }
+
+    public ParameterResolver<?, ?> getResolver(CommandParameter parameter) {
+        HandledCommand command = parameter.getDeclaringCommand();
+        for (ResolverFactory<?> factory : resolverFactories) {
+            ParameterResolver<?, ?> resolver = factory.create(parameter, command, this);
+            if (resolver != null) return resolver;
+        }
+        throw new IllegalArgumentException("Don't know how to resolve parameter '" + parameter.getName() + "'of type " + parameter.getType());
     }
 
     protected void injectValues(Class<?> type, @NotNull CommandSubject sender, @NotNull List<String> args, @NotNull HandledCommand command, @NotNull CommandContext bcmd, List<Object> ia) {

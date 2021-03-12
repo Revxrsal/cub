@@ -117,20 +117,6 @@ public class BaseHandledCommand implements HandledCommand {
                         index == ((Method) ae).getParameterCount() - 1 && !pr.has(Single.class),
                         handler,
                         this,
-                        c(firstNotNull(
-                                handler.typeResolvers.get(parameter.getType()),
-                                handler.cxtResolvers.get(parameter.getType()),
-                                parameter.getType().isEnum() ? (ParameterResolver.ValueResolver<Enum<?>>) new ParameterResolver.ValueResolver<Enum<?>>() {
-                                    @Override public Enum<?> resolve(@NotNull ArgumentStack args, @NotNull CommandSubject sender, @NotNull CommandParameter parameter1) throws Throwable {
-                                        String value = args.pop();
-                                        try {
-                                            return Enum.valueOf(((Class<? extends Enum>) parameter.getType()), value.toUpperCase());
-                                        } catch (NoSuchElementException e) {
-                                            throw new ResolverFailedException(this, value, parameter1, null);
-                                        }
-                                    }
-                                } : null),
-                                "Don't know how to resolve parameter type " + parameter.getType()),
                         pr.has(Optional.class),
                         pr.get(Switch.class),
                         pr.get(Flag.class)

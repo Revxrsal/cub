@@ -1,7 +1,6 @@
 package io.github.revxrsal.cub;
 
 import io.github.revxrsal.cub.exception.InvalidHelpPageException;
-import org.jetbrains.annotations.ApiStatus.AvailableSince;
 import org.jetbrains.annotations.Range;
 
 import java.util.List;
@@ -12,8 +11,8 @@ import java.util.List;
  * This class contains useful methods to allow paginating the help entries.
  *
  * @param <T> The help entry type. See {@link CommandHelpWriter} for more information.
+ * @since 1.7.0
  */
-@AvailableSince("1.7.0")
 public interface CommandHelp<T> extends List<T> {
 
     /**

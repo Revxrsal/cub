@@ -3,7 +3,6 @@ package io.github.revxrsal.cub;
 import io.github.revxrsal.cub.annotation.*;
 import io.github.revxrsal.cub.exception.CommandException;
 import io.github.revxrsal.cub.exception.CommandExceptionHandler;
-import org.jetbrains.annotations.ApiStatus.AvailableSince;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -30,7 +29,7 @@ public interface CommandHandler {
      * @param command The command object instance. Can be a class if methods are static.
      * @return This command handler
      */
-    CommandHandler registerCommand(@NotNull Object command);
+    CommandHandler registerCommand(@NotNull Object... command);
 
     /**
      * Registers the specified instance in which includes any methods annotated
@@ -217,17 +216,17 @@ public interface CommandHandler {
 
     /**
      * Returns the {@link CommandHelpWriter} used to generate the
-     * appropriate help entries. If not set, a default one will be used.
+     * appropriate help entries. If not set, this will return null.
      * <p>
      * See {@link CommandHelpWriter} for more information.
      *
      * @param <T> The command help writer entry type
      * @return The writer
-     * @since 1.7.0
      * @see CommandHelp
      * @see CommandHelpWriter
+     * @since 1.7.0
      */
-    @AvailableSince("1.7.0") @NotNull <T> CommandHelpWriter<T> getHelpWriter();
+    <T> CommandHelpWriter<T> getHelpWriter();
 
     /**
      * Sets the {@link CommandHelpWriter} used to generate the
@@ -238,10 +237,32 @@ public interface CommandHandler {
      * @param writer New writer to use.
      * @param <T>    The command help writer entry type
      * @return The writer
-     * @since 1.7.0
      * @see CommandHelp
      * @see CommandHelpWriter
+     * @since 1.7.0
      */
-    @AvailableSince("1.7.0") <T> CommandHandler setHelpWriter(@NotNull CommandHelpWriter<T> writer);
+    <T> CommandHandler setHelpWriter(@NotNull CommandHelpWriter<T> writer);
+
+    /**
+     * Registers a {@link ValueResolverFactory} to this handler
+     *
+     * @param factory Factory to register
+     * @return This command handler
+     * @see ValueResolverFactory
+     * @see #registerContextResolverFactory(ContextResolverFactory)
+     * @since 1.8.0
+     */
+    CommandHandler registerValueResolverFactory(@NotNull ValueResolverFactory factory);
+
+    /**
+     * Registers a {@link ValueResolverFactory} to this handler
+     *
+     * @param factory Factory to register
+     * @return This command handler
+     * @see ContextResolverFactory
+     * @see #registerValueResolverFactory(ValueResolverFactory)
+     * @since 1.8.0
+     */
+    CommandHandler registerContextResolverFactory(@NotNull ContextResolverFactory factory);
 
 }
