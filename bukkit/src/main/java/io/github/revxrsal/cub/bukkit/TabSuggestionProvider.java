@@ -1,8 +1,6 @@
 package io.github.revxrsal.cub.bukkit;
 
 import io.github.revxrsal.cub.HandledCommand;
-import io.github.revxrsal.cub.bukkit.core.BukkitHandler;
-import io.github.revxrsal.cub.core.Utils;
 import org.bukkit.command.Command;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +11,7 @@ import java.util.*;
 /**
  * A provider for tab completions.
  * <p>
- * Register with {@link BukkitHandler#registerTabSuggestion(String, TabSuggestionProvider)}
+ * Register with {@link BukkitCommandHandler#registerTabSuggestion(String, TabSuggestionProvider)}
  */
 public interface TabSuggestionProvider {
 

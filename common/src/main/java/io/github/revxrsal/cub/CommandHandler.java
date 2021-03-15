@@ -255,7 +255,7 @@ public interface CommandHandler {
     CommandHandler registerValueResolverFactory(@NotNull ValueResolverFactory factory);
 
     /**
-     * Registers a {@link ValueResolverFactory} to this handler
+     * Registers a {@link ContextResolverFactory} to this handler
      *
      * @param factory Factory to register
      * @return This command handler

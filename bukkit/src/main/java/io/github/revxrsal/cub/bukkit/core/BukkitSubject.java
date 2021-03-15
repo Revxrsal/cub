@@ -41,7 +41,7 @@ class BukkitSubject implements BukkitCommandSubject {
         return sender instanceof Player ? (Player) sender : null;
     }
 
-    @Override public @NotNull Player requirePlayer() {
+    @Override public @NotNull Player requirePlayer() throws SenderNotPlayerException {
         if (!(sender instanceof Player))
             throw new SenderNotPlayerException();
         return (Player) sender;

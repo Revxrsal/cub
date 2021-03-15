@@ -36,7 +36,8 @@ public interface BukkitCommandSubject extends CommandSubject {
      * Requires this sender to be player, otherwise throws {@link SenderNotPlayerException}.
      *
      * @return The sender as the player
+     * @throws SenderNotPlayerException if the sender is not a player (i.e console)
      */
-    @NotNull Player requirePlayer();
+    @NotNull Player requirePlayer() throws SenderNotPlayerException;
 
 }
