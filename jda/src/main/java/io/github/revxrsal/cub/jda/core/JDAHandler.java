@@ -13,6 +13,7 @@ import io.github.revxrsal.cub.jda.JDACommandSubject;
 import lombok.AllArgsConstructor;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +42,7 @@ public final class JDAHandler extends BaseCommandHandler implements JDACommandHa
         jda.addEventListener(new JDADispatcher(this));
         setExceptionHandler(DefaultExceptionHandler.INSTANCE);
         registerContextResolver(JDACommandSubject.class, (args, sender, parameter) -> (JDACommandSubject) sender);
+        registerContextResolver(GuildMessageReceivedEvent.class, (args, subject, parameter) -> ((JDACommandSubject) subject).getParentEvent());
         registerContextResolver(SelfUser.class, (args, subject, parameter) -> ((JDACommandSubject) subject).getParentEvent().getJDA().getSelfUser());
         registerContextResolver(JDA.class, (args, subject, parameter) -> jda);
         registerDependency(JDA.class, jda);
