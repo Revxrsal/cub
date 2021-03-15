@@ -34,10 +34,11 @@ Glad you asked!
     - Easily create [subcommands](https://github.com/ReflxctionDev/cub/blob/master/common/src/main/java/io/github/revxrsal/cub/annotation/Subcommand.java), or [catch invalid usages](https://github.com/ReflxctionDev/cub/blob/master/common/src/main/java/io/github/revxrsal/cub/annotation/CatchInvalid.java).
     - Built-in [dependency injection](https://github.com/ReflxctionDev/cub/blob/master/common/src/main/java/io/github/revxrsal/cub/annotation/Dependency.java).
     - Instead of having to register lambdas for conditions or parameter resolvers, you can avoid the [callback hell](http://callbackhell.com/) and create resolver objects, which define methods to resolve values.
-        -  [ConditionEvaluator](https://github.com/ReflxctionDev/cub/blob/master/common/src/main/java/io/github/revxrsal/cub/annotation/ConditionEvaluator.java)
+        - [ConditionEvaluator](https://github.com/ReflxctionDev/cub/blob/master/common/src/main/java/io/github/revxrsal/cub/annotation/ConditionEvaluator.java)
         - [ValueResolver](https://github.com/ReflxctionDev/cub/blob/master/common/src/main/java/io/github/revxrsal/cub/annotation/ValueResolver.java)
         - [ContextResolver](https://github.com/ReflxctionDev/cub/blob/master/common/src/main/java/io/github/revxrsal/cub/annotation/ContextResolver.java)
         - [TabResolver](https://github.com/ReflxctionDev/cub/blob/master/bukkit/src/main/java/io/github/revxrsal/cub/bukkit/annotation/TabResolver.java) for Bukkit
+        - [ContextResolverFactories](https://github.com/ReflxctionDev/cub/blob/master/common/src/main/java/io/github/revxrsal/cub/ContextResolverFactory.java) and [ValueResolverFactories](https://github.com/ReflxctionDev/cub/blob/master/common/src/main/java/io/github/revxrsal/cub/ValueResolverFactory.java) for creating dedicated resolvers for special types. Even more potential!
     - (Bukkit) No need to explicitly define completions per method as they can be fetched from the command parameters automatically.
 - **Cub is flexible**: The API in cub has extensive documentation, and is very simple and easy to hook into. With the ability to integrate custom annotations, custom validators and custom resolvers, there is so much that you can do with this library!
 - **Cub is fast**: Cub uses the Java 7-introduced MethodHandles API, which is a faster alternative to the classic Java reflection, hence better performance. Cub also caches everything for later use, hence no need for any lookups after registering.
