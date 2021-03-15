@@ -108,7 +108,6 @@ public class BaseHandledCommand implements HandledCommand {
             for (int index = 0; index < parameters.length; index++) {
                 Parameter parameter = parameters[index];
                 AnnReader pr = new AnnReader(parameter);
-                //noinspection RedundantCast
                 BaseCommandParam param = new BaseCommandParam(
                         parameter,
                         pr.get(Named.class, Named::value, parameter.getName()),

@@ -376,7 +376,7 @@ public class BaseCommandHandler implements CommandHandler {
             ParameterResolver<?, ?> resolver = factory.create(parameter, command, this);
             if (resolver != null) return resolver;
         }
-        throw new IllegalArgumentException("Don't know how to resolve parameter '" + parameter.getName() + "'of type " + parameter.getType());
+        throw new IllegalArgumentException("Don't know how to resolve parameter '" + parameter.getName() + "' of type " + parameter.getType());
     }
 
     protected void injectValues(Class<?> type, @NotNull CommandSubject sender, @NotNull List<String> args, @NotNull HandledCommand command, @NotNull CommandContext bcmd, List<Object> ia) {
