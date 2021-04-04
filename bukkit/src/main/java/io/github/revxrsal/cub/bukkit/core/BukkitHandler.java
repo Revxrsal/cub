@@ -16,6 +16,7 @@ import io.github.revxrsal.cub.exception.InvalidValueException;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -92,6 +93,7 @@ public final class BukkitHandler extends BaseCommandHandler implements BukkitCom
         registerParameterTab(World.class, "worlds");
         registerContextResolver(CommandSender.class, (args, subject, parameter) -> ((BukkitSubject) subject).getSender());
         registerContextResolver(plugin.getClass(), (ContextResolver) ContextResolver.of(plugin));
+        registerContextResolver(Server.class, ContextResolver.of(Bukkit::getServer));
         registerContextResolver(ConsoleCommandSender.class, ContextResolver.of(Bukkit.getConsoleSender()));
         registerContextResolver(BukkitCommandSubject.class, (args, sender, parameter) -> (BukkitCommandSubject) sender);
         setExceptionHandler(DefaultExceptionHandler.INSTANCE);
