@@ -6,10 +6,7 @@ import io.github.revxrsal.cub.CommandHandler;
 import io.github.revxrsal.cub.CommandSubject;
 import io.github.revxrsal.cub.HandledCommand;
 import io.github.revxrsal.cub.ParameterResolver.ContextResolver;
-import io.github.revxrsal.cub.bukkit.BukkitCommandHandler;
-import io.github.revxrsal.cub.bukkit.BukkitCommandSubject;
-import io.github.revxrsal.cub.bukkit.PlayerSelector;
-import io.github.revxrsal.cub.bukkit.TabSuggestionProvider;
+import io.github.revxrsal.cub.bukkit.*;
 import io.github.revxrsal.cub.bukkit.annotation.TabResolver;
 import io.github.revxrsal.cub.core.BaseCommandHandler;
 import io.github.revxrsal.cub.exception.InvalidValueException;
@@ -63,7 +60,7 @@ public final class BukkitHandler extends BaseCommandHandler implements BukkitCom
             String name = a.popForParameter(parameter);
             if (name.equalsIgnoreCase("me")) {
                 if (b instanceof Player) return ((Player) b).getWorld();
-                throw new ServerNotActiveException();
+                throw new SenderNotPlayerException();
             }
             World world = Bukkit.getWorld(name);
             if (world == null) throw new InvalidValueException(InvalidValueException.NUMBER, name);
