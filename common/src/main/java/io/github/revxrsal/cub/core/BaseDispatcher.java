@@ -61,6 +61,7 @@ public abstract class BaseDispatcher {
                 }
                 try {
                     command.fallback.invokeWithArguments(fallbackArgs);
+                    return;
                 } catch (Throwable throwable) {
                     throw new IllegalStateException("Cannot invoke @CatchInvalid method", throwable);
                 }
