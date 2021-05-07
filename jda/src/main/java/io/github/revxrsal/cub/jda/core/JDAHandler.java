@@ -45,6 +45,7 @@ public final class JDAHandler extends BaseCommandHandler implements JDACommandHa
         registerContextResolver(GuildMessageReceivedEvent.class, (args, subject, parameter) -> ((JDACommandSubject) subject).getParentEvent());
         registerContextResolver(SelfUser.class, (args, subject, parameter) -> ((JDACommandSubject) subject).getParentEvent().getJDA().getSelfUser());
         registerContextResolver(JDA.class, (args, subject, parameter) -> jda);
+        registerContextResolver(Guild.class, (args, subject, parameter) -> ((JDACommandSubject) subject).getParentEvent().getGuild());
         registerDependency(JDA.class, jda);
         registerTypeResolver(User.class, (args, csubject, parameter) -> {
             JDACommandSubject subject = (JDACommandSubject) csubject;
