@@ -1,5 +1,4 @@
-
-# Cub
+# Cub has been deprecated in favor of [Lamp](https://github.com/Revxrsal/Lamp), a better, richer and cleaner command framework.
 [![](https://jitpack.io/v/ReflxctionDev/cub.svg)](https://jitpack.io/#ReflxctionDev/cub)
 
 ![A nice little cub](https://i.imgur.com/AjsOvv4.jpg)
